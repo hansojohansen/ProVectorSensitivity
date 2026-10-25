@@ -210,3 +210,15 @@ The main metric is Fitts throughput; we also look at per-direction error. The re
 ## D10. Hardware dongle variant — Parked
 This is a closed-source commercial USB pass-through device. It is outside this project's scope; see `CLAUDE.md`.
 **Only constraint now:** the profile format must stay hardware-agnostic, in counts and angles, not Raw Accel keys.
+
+## D14. Conventions shared by all modules — Accepted
+These conventions apply to every schema and API. Changing any of them goes through the PM.
+- **Angle θ** = `atan2(dy, dx)` in raw mouse-count coordinates, matching Raw Input and Raw Accel:
+  - dx > 0 is right and dy > 0 is down;
+  - 0 = right, π/2 = down, π = left, 3π/2 = up;
+  - the range is [0, 2π) in **radians** internally; degrees are for UI only.
+- **Gain g(θ)** = |output counts| / |input counts| for a movement in direction θ, relative to the user's
+  base sensitivity. Identity is 1.0.
+- **Time:** int64 microseconds on a monotonic clock derived from QPC, with a recorded offset to UTC.
+- **Interface between Core and RawAccel.** Projection backends take a sampled target
+  `(theta[], gain[], weight[])` and do not depend on Core types. Core converts its Fourier model to those samples.
