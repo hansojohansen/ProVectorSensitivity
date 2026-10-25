@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\research\rawaccel-angular\wrapper\wrapper.vcxproj" />
+    <Content Include="$(SolutionDir)research/driver/rawaccel.sys" />
+  </ItemGroup>
+</Project>

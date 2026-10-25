@@ -1,0 +1,138 @@
+# OpenVector product CI. The research driver has its own workflow (research-driver.yml) and is
+# never built, referenced or shipped from here (D11). The constraint linter enforces that.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+  SOLUTION: OpenVector.slnx
+
+jobs:
+  linux:
+    name: Linux (core, linter, reference)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Constraint checks run first: they are fast and they guard D5/D11.
+      - name: Constraint linter (D5/D11)
+        run: python tools/lint/ovlint.py
+
+      - name: List reviewed lint allow comments
+        run: python tools/lint/ovlint.py --list-allows
+
+      - name: Linter unit tests
+        run: python -m unittest discover -s tools/lint/tests -v
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # net10.0-windows projects compile on Linux because Directory.Build.props sets
+      # EnableWindowsTargeting. Only their tests are skipped here; the windows job runs them.
+      - name: Build solution
+        run: dotnet build "$SOLUTION" -c Release
+
+      - name: Test cross-platform test projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+          ran=0
+          for proj in tests/**/*.csproj; do
+            if grep -Eq '<TargetFrameworks?>[^<]*-windows' "$proj"; then
+              echo "::notice::Skipping Windows-only test project $proj on Linux"
+              continue
+            fi
+            echo "::group::dotnet test $proj"
+            dotnet test "$proj" -c Release --no-build --logger "trx;LogFilePrefix=linux" --results-directory TestResults
+            echo "::endgroup::"
+            ran=$((ran+1))
+          done
+          echo "Ran $ran cross-platform test project(s)"
+
+      - name: Python reference tests (reference/python)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d reference/python ]; then
+            echo "reference/python not present yet, skipping"; exit 0
+          fi
+          python -m pip install --upgrade pip
+          if [ -f reference/python/requirements-dev.txt ]; then
+            python -m pip install -r reference/python/requirements-dev.txt
+          elif [ -f reference/python/requirements.txt ]; then
+            python -m pip install -r reference/python/requirements.txt
+          else
+            python -m pip install numpy scipy
+          fi
+          python -m pip install pytest
+          python -m pytest reference/python -q
+
+      - name: Validate JSON schemas (schemas/)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d schemas ]; then
+            echo "schemas/ not present yet, skipping"; exit 0
+          fi
+          python -m pip install jsonschema
+          python tools/lint/check_schemas.py
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-linux
+          path: TestResults
+          if-no-files-found: ignore
+
+  windows:
+    name: Windows (all projects)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Constraint linter (D5/D11)
+        run: python tools/lint/ovlint.py
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build solution (incl. net10.0-windows)
+        run: dotnet build $env:SOLUTION -c Release
+
+      - name: Test all test projects
+        run: dotnet test $env:SOLUTION -c Release --no-build --logger "trx;LogFilePrefix=windows" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-windows
+          path: TestResults
+          if-no-files-found: ignore

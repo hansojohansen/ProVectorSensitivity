@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Mentions of docs/research/ are fine; so is a word like "researcher". -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Description>Notes in docs/research/A-input-layer.md; researcher-friendly</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenVector.Core\OpenVector.Core.csproj" />
+  </ItemGroup>
+</Project>

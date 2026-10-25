@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <!-- openvector-lint-allow: research-reference fixture proving XML allow comments work -->
+    <None Include="..\..\research\README.md" />
+  </ItemGroup>
+</Project>

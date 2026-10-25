@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/OpenVector.Core/OpenVector.Core.csproj" />
+  <Project Path="research/rawaccel-angular/writer/writer.csproj" />
+</Solution>
