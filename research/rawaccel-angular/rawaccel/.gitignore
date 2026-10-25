@@ -1,0 +1,7 @@
+# build outputs (research fork)
+packages/
+x64/
+ARM64/
+signed/*
+!signed/README-RESEARCH.txt
+*.aps

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openvector.dev/schemas/session/1.0.0",
+  "title": "OpenVector calibration Session v1",
+  "description": "Session metadata + references to the lossless session streams (DECISIONS D15). Streams are recorded only inside the OpenVector trainer during a calibration session (D5) and stored locally. Stream file formats are owned by the Trainer module; this schema only references them by path, format id and format schema version. MovementTrial records (movement-trial.schema.json) are a derived view of these streams. Times are int64 µs on the session's monotonic QPC-derived clock (D14).",
+  "type": "object",
+  "required": ["schema_version", "session_id", "kind", "clock", "trainer", "device", "view", "streams"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "session_id": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["calibration", "ab_validation", "research", "other"] },
+    "clock": {
+      "type": "object",
+      "required": ["type", "utc_offset_us"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "qpc_us" },
+        "qpc_frequency_hz": { "type": "integer", "minimum": 1 },
+        "utc_offset_us": { "type": "integer", "description": "UTC unix-epoch µs = t + utc_offset_us." }
+      }
+    },
+    "started_at": { "type": "string", "format": "date-time", "description": "Wall-clock start with the local UTC offset (gives time of day)." },
+    "ended_at": { "type": ["string", "null"], "format": "date-time" },
+    "t_start_us": { "type": "integer" },
+    "t_end_us": { "type": ["integer", "null"] },
+    "duration_us": { "type": ["integer", "null"], "minimum": 0 },
+    "trainer": {
+      "type": "object",
+      "required": ["version"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "build": { "type": "string" },
+        "protocol_id": { "type": "string" },
+        "seed": { "type": "integer", "minimum": 0, "description": "Trial-plan seed (TrialPlanGenerator)." },
+        "plan": { "type": "object", "description": "Trial-plan parameters (sectors, amplitudes, reps, ...).", "additionalProperties": true }
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "vid": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "pid": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "name": { "type": "string" },
+        "dpi": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "polling_hz_nominal": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "polling_hz_measured": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+      }
+    },
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "refresh_hz": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "resolution": { "type": ["array", "null"], "items": { "type": "integer", "minimum": 1 }, "minItems": 2, "maxItems": 2 },
+        "vrr": { "type": ["boolean", "null"] },
+        "present_mode": { "type": ["string", "null"] }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["yaw_deg_per_count", "pitch_deg_per_count"],
+      "additionalProperties": false,
+      "properties": {
+        "yaw_deg_per_count": { "type": "number", "exclusiveMinimum": 0 },
+        "pitch_deg_per_count": { "type": "number", "exclusiveMinimum": 0 },
+        "fov_h_deg": { "type": ["number", "null"], "exclusiveMinimum": 0, "exclusiveMaximum": 180 },
+        "fov_scaling": { "type": ["string", "null"] },
+        "cm_per_360": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "game_preset": { "type": ["string", "null"] }
+      }
+    },
+    "rawaccel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "detected": { "type": "boolean" },
+        "version": { "type": ["string", "null"] },
+        "settings_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "active_gain_map_id": { "type": "string", "default": "identity" },
+    "breaks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t_start_us", "t_end_us"],
+        "additionalProperties": false,
+        "properties": {
+          "t_start_us": { "type": "integer" },
+          "t_end_us": { "type": "integer" },
+          "reason": { "enum": ["scheduled", "user_pause", "focus_loss", "other"] }
+        }
+      }
+    },
+    "self_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "warmed_up": { "type": ["boolean", "null"] },
+        "fatigue_1_5": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
+        "notes": { "type": "string" }
+      }
+    },
+    "streams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path", "format", "format_schema_version"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "enum": ["raw_input", "frames", "events", "trials", "other"] },
+          "path": { "type": "string", "minLength": 1, "description": "Relative to the session.json file." },
+          "format": { "type": "string", "minLength": 1, "description": "Format id owned by the producing module, e.g. 'ov-raw-input' (Trainer) or 'ov-movement-trial-jsonl'." },
+          "format_schema_version": { "type": "string" },
+          "compression": { "enum": ["none", "zstd", "gzip", "parquet_internal"] },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "records": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

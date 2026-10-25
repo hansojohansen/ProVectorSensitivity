@@ -1,0 +1,564 @@
+OpenVector RESEARCH build: angle x speed gain table for Raw Accel v1.7.1 (53a721345617a1e29f3a16750cbdf807040cf44e).
+RESEARCH ONLY - test-signed, never shipped, never for anticheat-protected games. MIT (see LICENSE).
+Apply from an upstream checkout at that commit with: patch -p1 < this.patch
+
+diff -ruN a/.gitignore b/.gitignore
+--- a/.gitignore	1970-01-01 00:00:00.000000000 +0000
++++ b/.gitignore	2026-10-25 13:41:46.000000000 +0000
+@@ -0,0 +1,7 @@
++# build outputs (research fork)
++packages/
++x64/
++ARM64/
++signed/*
++!signed/README-RESEARCH.txt
++*.aps
+diff -ruN a/Directory.Build.props b/Directory.Build.props
+--- a/Directory.Build.props	1970-01-01 00:00:00.000000000 +0000
++++ b/Directory.Build.props	2026-10-25 13:41:46.000000000 +0000
+@@ -0,0 +1,21 @@
++<!--
++  OpenVector RESEARCH build (not part of upstream Raw Accel).
++  This file also stops MSBuild from picking up the OpenVector product Directory.Build.props
++  further up the tree, so the research fork never mixes with product build settings (D11).
++
++  The WDK and the matching Windows SDK come from NuGet (restored into .\packages by
++  build.ps1 or the research-driver workflow) and are imported for the kernel driver project
++  only. User-mode projects (wrapper, writer, installer) use the Visual Studio 2022 SDK.
++-->
++<Project>
++  <PropertyGroup>
++    <OvWdkVersion Condition="'$(OvWdkVersion)' == ''">10.0.26100.6584</OvWdkVersion>
++    <OvPkgDir>$(MSBuildThisFileDirectory)packages\</OvPkgDir>
++    <OvIsDriver Condition="'$(MSBuildProjectName)' == 'driver' and '$(MSBuildProjectExtension)' == '.vcxproj'">true</OvIsDriver>
++  </PropertyGroup>
++  <ImportGroup Condition="'$(OvIsDriver)' == 'true' and '$(Platform)' == 'x64'">
++    <Import Project="$(OvPkgDir)Microsoft.Windows.SDK.CPP.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.SDK.CPP.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.props')" />
++    <Import Project="$(OvPkgDir)Microsoft.Windows.SDK.CPP.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.SDK.CPP.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
++    <Import Project="$(OvPkgDir)Microsoft.Windows.WDK.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.WDK.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props')" />
++  </ImportGroup>
++</Project>
+diff -ruN a/Directory.Build.targets b/Directory.Build.targets
+--- a/Directory.Build.targets	1970-01-01 00:00:00.000000000 +0000
++++ b/Directory.Build.targets	2026-10-25 13:42:34.000000000 +0000
+@@ -0,0 +1,3 @@
++<!-- OpenVector RESEARCH build: intentionally empty, isolates this tree from any Directory.Build.targets further up. -->
++<Project>
++</Project>
+diff -ruN a/ReadMe.md b/ReadMe.md
+--- a/ReadMe.md	2026-10-25 13:52:24.625984938 +0000
++++ b/ReadMe.md	2026-10-25 13:47:26.000000000 +0000
+@@ -1,3 +1,7 @@
++> **OpenVector RESEARCH fork, NOT official Raw Accel.** This copy adds an experimental angle x speed
++> gain table and is only ever test-signed. Never use it with anticheat-protected games. See
++> [`../README.md`](../README.md). The text below is the unchanged upstream ReadMe.
++
+ # Raw Accel
+ 
+ Raw Accel is a Windows 10 & Windows 11 x86-64 driver which allows for the acceleration of mouse input in the raw input stream. It started as a replacement for [InterAccel](https://github.com/KovaaK/InterAccel) and has been extended with more acceleration types, charts, and other features.
+diff -ruN a/build/packages.config b/build/packages.config
+--- a/build/packages.config	1970-01-01 00:00:00.000000000 +0000
++++ b/build/packages.config	2026-10-25 13:41:46.000000000 +0000
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- OpenVector RESEARCH build: WDK + matching SDK from NuGet (see ../Directory.Build.props). -->
++<packages>
++  <package id="Microsoft.Windows.SDK.CPP" version="10.0.26100.6584" targetFramework="native" />
++  <package id="Microsoft.Windows.SDK.CPP.x64" version="10.0.26100.6584" targetFramework="native" />
++  <package id="Microsoft.Windows.WDK.x64" version="10.0.26100.6584" targetFramework="native" />
++</packages>
+diff -ruN a/common/rawaccel-base.hpp b/common/rawaccel-base.hpp
+--- a/common/rawaccel-base.hpp	2026-10-25 13:52:24.633131105 +0000
++++ b/common/rawaccel-base.hpp	2026-10-25 13:38:39.000000000 +0000
+@@ -21,6 +21,15 @@
+ 
+     inline constexpr double MAX_NORM = 16;
+ 
++    // ---- OpenVector RESEARCH build: angle x speed gain table -------------------
++    // Not part of upstream Raw Accel. See research/rawaccel-angular/README.md.
++    inline constexpr int ANGULAR_GAIN_MAX_ANGLES = 128;
++    inline constexpr int ANGULAR_GAIN_MAX_SPEEDS = 16;
++    inline constexpr size_t ANGULAR_GAIN_CAPACITY =
++        size_t(ANGULAR_GAIN_MAX_ANGLES) * ANGULAR_GAIN_MAX_SPEEDS;
++    inline constexpr double ANGULAR_GAIN_MIN = 0.5;
++    inline constexpr double ANGULAR_GAIN_MAX = 2.0;
++
+     // At this DPI, one count per ms equals one inch per second.
+     inline constexpr double NORMALIZED_DPI = 1000;
+ 
+@@ -74,6 +83,29 @@
+         double output_speed_smooth_halflife = 0;
+     };
+ 
++    /// <summary>
++    /// RESEARCH ONLY. Static, direction-preserving gain table g(theta, speed).
++    ///
++    /// theta = atan2(dy, dx) of the raw input packet, in [0, 2pi):
++    ///   0 = right, pi/2 = down, pi = left, 3pi/2 = up (Windows/Raw Input convention).
++    /// Angle grid:  theta_i = 2pi * i / angle_points, i = 0 .. angle_points-1 (periodic).
++    /// Speed grid:  log-spaced, s_j = speed_min * (speed_max/speed_min)^(j/(speed_points-1)),
++    ///              j = 0 .. speed_points-1; speed in Raw Accel input units (counts/ms,
++    ///              times 1000/DPI when the device DPI is set). speed_points = 1 means
++    ///              speed-independent (speed_min/speed_max are then ignored).
++    /// data[j * angle_points + i] = gain at (theta_i, s_j), each in [0.5, 2].
++    /// Lookup: bilinear, periodic in theta, linear in log(speed), clamped at the speed ends.
++    /// angle_points == 0 disables the table (the default).
++    /// </summary>
++    struct angular_gain_args {
++        int angle_points = 0;
++        int speed_points = 0;
++        double speed_min = 1;
++        double speed_max = 1;
++        int length = 0;   // number of data entries provided (validation: == angle_points * speed_points)
++        float data[ANGULAR_GAIN_CAPACITY] = {};
++    };
++
+     struct profile {
+         wchar_t name[MAX_NAME_LEN] = L"default";
+ 
+@@ -95,5 +127,8 @@
+ 
+         double speed_min = 0;
+         double speed_max = 0;
++
++        // RESEARCH build only (appended so the upstream fields keep their order).
++        angular_gain_args angular_gain;
+     };
+ }
+diff -ruN a/common/rawaccel-validate.hpp b/common/rawaccel-validate.hpp
+--- a/common/rawaccel-validate.hpp	2026-10-25 13:52:24.633252851 +0000
++++ b/common/rawaccel-validate.hpp	2026-10-25 13:39:21.000000000 +0000
+@@ -178,6 +178,52 @@
+ 			error("range weights"" must be positive");
+ 		}
+ 
++		// RESEARCH build only: angle x speed gain table
++		{
++			static_assert(ANGULAR_GAIN_MAX_ANGLES == 128 && ANGULAR_GAIN_MAX_SPEEDS == 16, "update error msg");
++			static_assert(ANGULAR_GAIN_MIN == 0.5 && ANGULAR_GAIN_MAX == 2, "update error msg");
++
++			auto& t = args.angular_gain;
++
++			if (t.angle_points == 0) {
++				if (t.length != 0) {
++					error("angular gain: angle count is 0 but gains are given");
++				}
++			}
++			else if (t.angle_points < 0 || t.angle_points > ANGULAR_GAIN_MAX_ANGLES) {
++				error("angular gain: angle count must be between 1 and 128 (0 = off)");
++			}
++			else if (t.speed_points < 1 || t.speed_points > ANGULAR_GAIN_MAX_SPEEDS) {
++				error("angular gain: speed count must be between 1 and 16");
++			}
++			else if (t.length != t.angle_points * t.speed_points) {
++				error("angular gain: number of gains must equal angles * speeds");
++			}
++			else {
++				if (t.speed_points > 1) {
++					if (!(t.speed_min > 0) || infnan(t.speed_min) || infnan(t.speed_max)) {
++						error("angular gain: min speed must be positive");
++					}
++					else if (!(t.speed_max > t.speed_min)) {
++						error("angular gain: max speed must be greater than min speed");
++					}
++				}
++
++				bool out_of_range = false;
++
++				for (int i = 0; i < t.length; i++) {
++					double g = t.data[i];
++					if (infnan(g) || !(g >= ANGULAR_GAIN_MIN && g <= ANGULAR_GAIN_MAX)) {
++						out_of_range = true;
++					}
++				}
++
++				if (out_of_range) {
++					error("angular gain: every gain must be between 0.5 and 2");
++				}
++			}
++		}
++
+ 		return ret;
+ 	}
+ 
+diff -ruN a/common/rawaccel-version.h b/common/rawaccel-version.h
+--- a/common/rawaccel-version.h	2026-10-25 13:52:24.633278774 +0000
++++ b/common/rawaccel-version.h	2026-10-25 13:39:32.000000000 +0000
+@@ -2,7 +2,13 @@
+ 
+ #define RA_VER_MAJOR 1
+ #define RA_VER_MINOR 7
+-#define RA_VER_PATCH 0
++// OpenVector RESEARCH build: patch 900 marks the angle x speed gain table ABI.
++// The settings blob layout differs from upstream 1.7.x, so the version must differ too:
++//  - stock 1.7.x writer/GUI + this driver  -> "newer driver is installed" (refuses, safe)
++//  - this writer + stock 1.7.x driver      -> "reinstallation required" (refuses, safe)
++// The driver additionally rejects any WRITE whose size does not match its own struct sizes.
++#define RA_VER_PATCH 900
++#define RA_RESEARCH_BUILD 1
+ 
+ #define RA_OS "Win10+"
+ 
+@@ -30,7 +36,7 @@
+ 
+     inline constexpr version_t version = { RA_VER_MAJOR, RA_VER_MINOR, RA_VER_PATCH };
+ #ifndef _KERNEL_MODE
+-    inline constexpr version_t min_driver_version = { 1, 7, 0 };
++    inline constexpr version_t min_driver_version = { 1, 7, 900 }; // RESEARCH build: same ABI only
+ #endif
+ 
+ }
+diff -ruN a/common/rawaccel.hpp b/common/rawaccel.hpp
+--- a/common/rawaccel.hpp	2026-10-25 13:52:24.633295005 +0000
++++ b/common/rawaccel.hpp	2026-10-25 13:39:11.000000000 +0000
+@@ -40,6 +40,7 @@
+         bool apply_directional_weight = 0;
+         bool apply_dir_mul_x = 0;
+         bool apply_dir_mul_y = 0;
++        bool apply_angular_gain = 0; // RESEARCH build only
+ 
+         modifier_flags(const profile& args) 
+         {
+@@ -51,6 +52,8 @@
+             compute_ref_angle = apply_snap || apply_directional_weight;
+             apply_dir_mul_x = args.lr_output_dpi_ratio != 1;
+             apply_dir_mul_y = args.ud_output_dpi_ratio != 1;
++            // sizes are re-checked in angular_gain_lookup, data written to the driver is not validated
++            apply_angular_gain = args.angular_gain.angle_points > 0;
+         }
+ 
+         modifier_flags() = default;
+@@ -305,6 +308,78 @@
+ 
+     static_assert(alignof(io_base) == alignof(modifier_settings) && alignof(modifier_settings) == alignof(device_settings));
+ 
++    /// <summary>
++    /// RESEARCH ONLY (OpenVector, not upstream Raw Accel).
++    /// Stateless lookup of the angle x speed gain table described at angular_gain_args.
++    /// (dx, dy) is the raw input packet in counts, speed is |(dx, dy)| in Raw Accel input
++    /// units (counts/ms, times 1000/DPI if the device DPI is set).
++    /// Bilinear: linear in angle with periodic wrap, linear in log(speed), clamped at the
++    /// speed ends. No allocation, no state, O(1).
++    /// Safe on an unvalidated table (the driver never runs valid()): sizes are bounds-checked
++    /// here, non-finite intermediate values fall back to safe defaults, and the result is
++    /// clamped to [ANGULAR_GAIN_MIN, ANGULAR_GAIN_MAX]. NaN checks use the bit pattern
++    /// (infnan) because the driver is compiled with /fp:fast.
++    /// </summary>
++    inline double angular_gain_lookup(const angular_gain_args& t, double dx, double dy, double speed)
++    {
++        const int n = t.angle_points;
++        const int m = t.speed_points;
++
++        if (n < 1 || n > ANGULAR_GAIN_MAX_ANGLES || m < 1 || m > ANGULAR_GAIN_MAX_SPEEDS) {
++            return 1;
++        }
++
++        if (dx == 0 && dy == 0) {
++            return 1;
++        }
++
++        // angle: atan2 in (-pi, pi] -> [0, 2pi] -> grid position in [0, n]
++        double theta = atan2(dy, dx);
++        if (theta < 0) theta += 2 * M_PI;
++
++        double pos = theta * (n / (2 * M_PI));
++        if (infnan(pos) || pos < 0) pos = 0;
++
++        int i0 = static_cast<int>(pos);
++        double fa = pos - i0;
++
++        if (i0 >= n) {
++            // theta rounded to exactly 2pi, which is the same direction as 0
++            i0 = 0;
++            fa = 0;
++        }
++
++        int i1 = (i0 + 1 >= n) ? 0 : i0 + 1;
++
++        // speed: position on the log-spaced grid in [0, m - 1]
++        int j0 = 0;
++        double fs = 0;
++
++        if (m > 1) {
++            double u = log(speed / t.speed_min) / log(t.speed_max / t.speed_min) * (m - 1);
++
++            if (infnan(u) || u < 0) u = 0;
++            else if (u > m - 1) u = m - 1;
++
++            j0 = static_cast<int>(u);
++            if (j0 > m - 2) j0 = m - 2;
++            fs = u - j0;
++        }
++
++        const float* row = t.data + j0 * n;
++        double g = row[i0] + fa * (double(row[i1]) - row[i0]);
++
++        if (m > 1) {
++            const float* next = row + n;
++            double g_next = next[i0] + fa * (double(next[i1]) - next[i0]);
++            g += fs * (g_next - g);
++        }
++
++        if (infnan(g)) return 1;
++
++        return clampsd(g, ANGULAR_GAIN_MIN, ANGULAR_GAIN_MAX);
++    }
++
+     class modifier {
+     public:
+ #ifdef _KERNEL_MODE
+@@ -319,6 +394,14 @@
+             double reference_angle = 0;
+             double ips_factor = dpi_factor / time;
+ 
++            // RESEARCH build: the table is keyed on the raw packet (OpenVector D14), i.e. before
++            // rotation, snapping and the speed cap. It is applied last (see end of function).
++            double angular_gain = 1;
++
++            if (flags.apply_angular_gain) {
++                angular_gain = angular_gain_lookup(args.angular_gain, in.x, in.y, magnitude(in) * ips_factor);
++            }
++
+             if (flags.apply_rotate) in = rotate(in, data.rot_direction);
+ 
+             if (flags.compute_ref_angle && in.y != 0) {
+@@ -420,6 +503,13 @@
+             if (flags.apply_dir_mul_y && in.y < 0) {
+                 in.y *= args.ud_output_dpi_ratio;
+             }
++
++            // RESEARCH build: scalar multiply after the whole upstream pipeline, so it changes
++            // only the length of the output vector, never its direction.
++            if (flags.apply_angular_gain) {
++                in.x *= angular_gain;
++                in.y *= angular_gain;
++            }
+         }
+ 
+         modifier(modifier_settings& settings)
+diff -ruN a/driver/driver.rc b/driver/driver.rc
+--- a/driver/driver.rc	2026-10-25 13:52:24.635515808 +0000
++++ b/driver/driver.rc	2026-10-25 13:39:32.000000000 +0000
+@@ -32,10 +32,10 @@
+ 	BEGIN
+ 		BLOCK "040904b0"
+ 		BEGIN
+-			VALUE "FileDescription", "mouse acceleration filter driver"
++			VALUE "FileDescription", "mouse acceleration filter driver - OpenVector RESEARCH build (angle x speed gain table), TEST-SIGNED, NOT FOR GAMES"
+ 			VALUE "FileVersion", RA_VER_STRING
+ 			VALUE "OriginalFilename", "rawaccel.sys"
+-			VALUE "ProductName", "Raw Accel"
++			VALUE "ProductName", "Raw Accel (OpenVector research fork, unofficial)"
+ 			VALUE "ProductVersion", RA_VER_STRING
+ 		END
+ 	END
+diff -ruN a/installer/installer.cpp b/installer/installer.cpp
+--- a/installer/installer.cpp	2026-10-25 13:52:24.638114142 +0000
++++ b/installer/installer.cpp	2026-10-25 13:39:43.000000000 +0000
+@@ -43,6 +43,24 @@
+ int main() {
+     SC_HANDLE srv_manager = NULL;
+ 
++    // OpenVector RESEARCH build: explicit confirmation before replacing the driver.
++    std::cout <<
++        "=====================================================================\n"
++        " Raw Accel - OpenVector RESEARCH build (angle x speed gain table)\n"
++        " UNOFFICIAL, TEST-SIGNED. Loads only with Windows test-signing ON.\n"
++        " Never play anticheat-protected games (Valorant/Vanguard, FACEIT,\n"
++        " EAC, BattlEye, ...) while this driver or test-signing is active.\n"
++        " Undo: run the OFFICIAL Raw Accel installer, reboot, then turn\n"
++        " test-signing off (see research/rawaccel-angular/GUIDE.md).\n"
++        "=====================================================================\n"
++        "Install the research driver now? Press Y to continue, any other key to cancel.\n";
++
++    wint_t answer = _getwch();
++    if (answer != L'y' && answer != L'Y') {
++        std::cout << "Cancelled, nothing was changed.\n";
++        return 1;
++    }
++
+     try {
+         if (!IsWindows10OrGreater()) {
+             throw std::runtime_error("OS not supported, you need at least Windows 10");
+diff -ruN a/installer/installer.rc b/installer/installer.rc
+--- a/installer/installer.rc	2026-10-25 13:52:24.638133179 +0000
++++ b/installer/installer.rc	2026-10-25 13:39:43.000000000 +0000
+@@ -70,7 +70,7 @@
+     BEGIN
+         BLOCK "040904b0"
+         BEGIN
+-            VALUE "FileDescription", "Raw Accel installer (" RA_OS ")"
++            VALUE "FileDescription", "Raw Accel installer (" RA_OS ") - OpenVector RESEARCH build"
+             VALUE "FileVersion", RA_VER_STRING
+             VALUE "OriginalFilename", "installer.exe"
+             VALUE "ProductName", "Raw Accel"
+diff -ruN a/rawaccel.sln b/rawaccel.sln
+--- a/rawaccel.sln	2026-10-25 13:52:24.628361063 +0000
++++ b/rawaccel.sln	2026-10-25 13:41:30.000000000 +0000
+@@ -16,14 +16,10 @@
+ 		{0695A19E-8B14-4DE7-AADF-97E5912B197C} = {0695A19E-8B14-4DE7-AADF-97E5912B197C}
+ 	EndProjectSection
+ EndProject
+-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grapher", "grapher\grapher.csproj", "{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}"
+-EndProject
+ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "writer", "writer\writer.csproj", "{28ACF254-E4EF-4A0E-9761-0FE22048D6FD}"
+ EndProject
+ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wrapper-deps", "wrapper-deps\wrapper-deps.csproj", "{0695A19E-8B14-4DE7-AADF-97E5912B197C}"
+ EndProject
+-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wrapper-tests", "wrapper-tests\wrapper-tests.csproj", "{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}"
+-EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+ 		Debug|Any CPU = Debug|Any CPU
+@@ -86,18 +82,6 @@
+ 		{28A3656F-A1DE-405C-B547-191C32EC555F}.Release|ARM64.Build.0 = Release|ARM64
+ 		{28A3656F-A1DE-405C-B547-191C32EC555F}.Release|x64.ActiveCfg = Release|x64
+ 		{28A3656F-A1DE-405C-B547-191C32EC555F}.Release|x64.Build.0 = Release|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|Any CPU.ActiveCfg = Debug|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|Any CPU.Build.0 = Debug|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|ARM64.ActiveCfg = Debug|ARM64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|ARM64.Build.0 = Debug|ARM64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|x64.ActiveCfg = Debug|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Debug|x64.Build.0 = Debug|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|Any CPU.ActiveCfg = Release|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|Any CPU.Build.0 = Release|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|ARM64.ActiveCfg = Release|ARM64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|ARM64.Build.0 = Release|ARM64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|x64.ActiveCfg = Release|x64
+-		{EF67F71F-ABF5-4760-B50D-D1B9836DF01C}.Release|x64.Build.0 = Release|x64
+ 		{28ACF254-E4EF-4A0E-9761-0FE22048D6FD}.Debug|Any CPU.ActiveCfg = Debug|x64
+ 		{28ACF254-E4EF-4A0E-9761-0FE22048D6FD}.Debug|Any CPU.Build.0 = Debug|x64
+ 		{28ACF254-E4EF-4A0E-9761-0FE22048D6FD}.Debug|ARM64.ActiveCfg = Debug|ARM64
+@@ -122,18 +106,6 @@
+ 		{0695A19E-8B14-4DE7-AADF-97E5912B197C}.Release|ARM64.Build.0 = Release|ARM64
+ 		{0695A19E-8B14-4DE7-AADF-97E5912B197C}.Release|x64.ActiveCfg = Release|x64
+ 		{0695A19E-8B14-4DE7-AADF-97E5912B197C}.Release|x64.Build.0 = Release|x64
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|ARM64.ActiveCfg = Debug|ARM64
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|ARM64.Build.0 = Debug|ARM64
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|x64.ActiveCfg = Debug|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Debug|x64.Build.0 = Debug|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|Any CPU.Build.0 = Release|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|ARM64.ActiveCfg = Release|ARM64
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|ARM64.Build.0 = Release|ARM64
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|x64.ActiveCfg = Release|Any CPU
+-		{5DE4B0AC-D49B-43AE-B2B3-00C0A91D3C68}.Release|x64.Build.0 = Release|Any CPU
+ 	EndGlobalSection
+ 	GlobalSection(SolutionProperties) = preSolution
+ 		HideSolutionNode = FALSE
+diff -ruN a/signed/README-RESEARCH.txt b/signed/README-RESEARCH.txt
+--- a/signed/README-RESEARCH.txt	1970-01-01 00:00:00.000000000 +0000
++++ b/signed/README-RESEARCH.txt	2026-10-25 13:41:46.000000000 +0000
+@@ -0,0 +1,6 @@
++OpenVector RESEARCH build.
++
++Upstream Raw Accel keeps its officially signed release binaries here. This fork does NOT ship
++them. The folder only exists because the upstream Release post-build steps copy wrapper.dll,
++Newtonsoft.Json.dll and writer.exe into it. Nothing in here is signed or official.
++Get the official signed Raw Accel from https://github.com/RawAccelOfficial/rawaccel/releases
+diff -ruN a/wrapper/wrapper.cpp b/wrapper/wrapper.cpp
+--- a/wrapper/wrapper.cpp	2026-10-25 13:52:24.642706403 +0000
++++ b/wrapper/wrapper.cpp	2026-10-25 13:40:31.000000000 +0000
+@@ -205,6 +205,53 @@
+ 	double outputSmoothHalflife;
+ };
+ 
++// OpenVector RESEARCH build only: angle x speed gain table.
++// Mirrors ra::angular_gain_args (common/rawaccel-base.hpp); field order and types must match.
++// JSON (inside a profile, optional; absent = off, so upstream settings files still load):
++//   "Angular gain table (RESEARCH ONLY)": {
++//     "angles": N,            // 1..128, grid theta_i = 360*i/N deg; 0 = right, 90 = down, 180 = left, 270 = up
++//     "speeds": M,            // 1..16, 1 = speed-independent
++//     "speedMin": s0,         // counts/ms (x 1000/DPI if device DPI set), first speed column, M > 1 only
++//     "speedMax": s1,         // last speed column, log-spaced in between, M > 1 only
++//     "gains": [ ... ]        // N*M values in [0.5, 2], row-major: gains[j*N + i] = g(theta_i, s_j)
++//   }
++[StructLayout(LayoutKind::Sequential)]
++public value struct AngularGainArgs
++{
++    literal int MaxAngles = ra::ANGULAR_GAIN_MAX_ANGLES;
++    literal int MaxSpeeds = ra::ANGULAR_GAIN_MAX_SPEEDS;
++    literal double MinGain = ra::ANGULAR_GAIN_MIN;
++    literal double MaxGain = ra::ANGULAR_GAIN_MAX;
++
++    [JsonProperty("angles")]
++    int anglePoints;
++
++    [JsonProperty("speeds")]
++    int speedPoints;
++
++    [JsonProperty("speedMin")]
++    double speedMin;
++
++    [JsonProperty("speedMax")]
++    double speedMax;
++
++    [JsonIgnore]
++    int length;
++
++    [JsonProperty("gains")]
++    [MarshalAs(UnmanagedType::ByValArray, SizeConst = ra::ANGULAR_GAIN_CAPACITY)]
++    array<float>^ gains;
++
++    [OnDeserialized]
++    void OnDeserializedMethod(StreamingContext context)
++    {
++        // gains->Length must match SizeConst when marshalling; the real count is kept in
++        // length so validation can reject a table whose size is not angles * speeds
++        length = gains == nullptr ? 0 : gains->Length;
++        Array::Resize(gains, (int)ra::ANGULAR_GAIN_CAPACITY);
++    }
++};
++
+ [JsonObject(ItemRequired = Required::Always)]
+ [StructLayout(LayoutKind::Sequential, CharSet = CharSet::Unicode)]
+ public ref struct Profile
+@@ -244,6 +291,27 @@
+     [JsonProperty("Input Speed Cap")]
+     double maximumSpeed;
+ 
++    // RESEARCH build only, optional (see AngularGainArgs)
++    [JsonProperty("Angular gain table (RESEARCH ONLY)", Required = Required::Default)]
++    AngularGainArgs angularGain;
++
++    bool ShouldSerializeangularGain()
++    {
++        // keep files without a table identical in shape to upstream ones
++        return angularGain.anglePoints != 0 || angularGain.length != 0;
++    }
++
++    [OnDeserialized]
++    void OnDeserializedMethod(StreamingContext context)
++    {
++        // RESEARCH build: a missing table key (any upstream settings file) can leave the
++        // struct at default(T) under DefaultValueHandling::Populate; make it a valid "off" table
++        if (angularGain.gains == nullptr) {
++            angularGain.length = 0;
++            angularGain.gains = gcnew array<float>((int)ra::ANGULAR_GAIN_CAPACITY);
++        }
++    }
++
+     Profile(ra::profile& args)
+     {
+         Marshal::PtrToStructure(IntPtr(&args), this);
+@@ -766,6 +834,9 @@
+         auto empty = Array::Empty<float>();
+ 
+         for each (auto prof in profiles) {
++            // RESEARCH build: like LUT data, only serialize the gains in use
++            Array::Resize(prof->angularGain.gains, prof->angularGain.length);
++
+             if (prof->argsX.mode == AccelMode::lut) {
+                 // data->Length is fixed for interop, 
+                 // temporary resize avoids serializing a bunch of zeros
+@@ -794,6 +865,8 @@
+         jObject->AddFirst(gcnew JProperty("### Accel modes ###", accelModes));
+ 
+         for each (auto prof in profiles) {
++            Array::Resize(prof->angularGain.gains, (int)ra::ANGULAR_GAIN_CAPACITY);
++
+             if (prof->argsX.mode == AccelMode::lut) {
+                 Array::Resize(prof->argsX.data, ra::LUT_RAW_DATA_CAPACITY);
+             }

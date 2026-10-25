@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openvector.dev/schemas/profile/1.0.0",
+  "title": "OpenVector Profile v1",
+  "description": "Canonical, hardware-agnostic directional gain profile (DECISIONS D2, D8, D10, D14). Immutable once written; a new calibration creates a new profile with parent_id. Gain g(theta) = |output counts| / |input counts| for movement direction theta = atan2(dy, dx) in raw-count coordinates (x right, y down), radians in [0, 2pi). Evaluation: f(theta) = c0 + sum_k (c[2k-1] cos k*theta + c[2k] sin k*theta); g = clamp(1 / (1 + f), bounds.min_gain, bounds.max_gain). Backend-specific parameters live only in 'projections'.",
+  "type": "object",
+  "required": ["schema_version", "id", "created_at", "angle_convention", "mapping", "model", "bounds", "bins", "sessions", "projections"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "id": { "type": "string", "minLength": 1 },
+    "parent_id": { "type": ["string", "null"], "description": "Profile this one was derived from / replaces (history, rollback)." },
+    "created_at": { "type": "string", "format": "date-time" },
+    "name": { "type": "string" },
+    "angle_convention": { "const": "atan2_dy_dx_counts_rad", "description": "D14. Fixed for v1; present so that consumers can refuse unknown conventions." },
+    "mapping": {
+      "type": "object",
+      "description": "Sensitivity context at calibration. The map is defined in counts, so it stays valid only for this DPI (recalibrate after a DPI change).",
+      "required": ["yaw_deg_per_count", "pitch_deg_per_count"],
+      "additionalProperties": false,
+      "properties": {
+        "dpi": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "yaw_deg_per_count": { "type": "number", "exclusiveMinimum": 0 },
+        "pitch_deg_per_count": { "type": "number", "exclusiveMinimum": 0 },
+        "cm_per_360": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "fov_h_deg": { "type": ["number", "null"], "exclusiveMinimum": 0, "exclusiveMaximum": 180 },
+        "polling_hz": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["type", "quantity", "link", "order", "coeffs"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "fourier" },
+        "quantity": { "const": "relative_along_bias", "description": "f(theta) is the user's mean relative along-axis primary-endpoint error b(theta)." },
+        "link": { "const": "inverse_one_plus", "description": "g = 1 / (1 + f)." },
+        "order": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "coeffs": { "type": "array", "items": { "type": "number" }, "minItems": 1, "description": "[c0, a1, b1, a2, b2, ..., aK, bK], length 2*order+1." },
+        "cov": {
+          "type": ["array", "null"],
+          "items": { "type": "array", "items": { "type": "number" } },
+          "description": "Approximate posterior covariance of coeffs (row-major square matrix)."
+        },
+        "speed": {
+          "description": "Phase 2 placeholder (D12): tensor product of the Fourier basis with a B-spline in ln(speed). When present, coeffs is ignored and coeffs_2d[j] are the Fourier coeffs of spline basis j. v1 consumers must refuse profiles with a non-null speed dimension they do not implement.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["type", "degree", "knots_ln_speed", "coeffs_2d"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "const": "bspline_ln_speed" },
+                "speed_unit": { "const": "counts_per_s", "default": "counts_per_s" },
+                "degree": { "type": "integer", "minimum": 0, "maximum": 5 },
+                "knots_ln_speed": { "type": "array", "items": { "type": "number" } },
+                "coeffs_2d": { "type": "array", "items": { "type": "array", "items": { "type": "number" } } }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["min_gain", "max_gain"],
+      "additionalProperties": false,
+      "properties": {
+        "min_gain": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "max_gain": { "type": "number", "minimum": 1 }
+      }
+    },
+    "bins": {
+      "type": "array",
+      "description": "Display bins (64 in v1), centred on theta_k = 2*pi*k/N. gain is the clamped model value; CI is a bootstrap percentile interval; n is the number of used trials whose direction falls in the bin.",
+      "items": {
+        "type": "object",
+        "required": ["theta", "gain", "ci_low", "ci_high", "n"],
+        "additionalProperties": false,
+        "properties": {
+          "theta": { "type": "number", "minimum": 0, "exclusiveMaximum": 6.283185307179587 },
+          "gain": { "type": "number", "exclusiveMinimum": 0 },
+          "ci_low": { "type": "number", "exclusiveMinimum": 0 },
+          "ci_high": { "type": "number", "exclusiveMinimum": 0 },
+          "n": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "sessions": { "type": "array", "items": { "type": "string" }, "description": "Calibration session ids used for the fit." },
+    "fit": {
+      "type": "object",
+      "description": "Fit diagnostics (informational).",
+      "additionalProperties": true,
+      "properties": {
+        "method": { "type": "string" },
+        "signal": { "enum": ["primary", "final"] },
+        "n_trials": { "type": "integer", "minimum": 0 },
+        "n_used": { "type": "integer", "minimum": 0 },
+        "order_selected": { "type": "integer", "minimum": 0 },
+        "lambda": { "type": "number", "minimum": 0 },
+        "residual_sd": { "type": "number", "minimum": 0 },
+        "strata": { "type": "integer", "minimum": 1 },
+        "min_trials_per_stratum": { "type": "number", "minimum": 0 },
+        "sparse_strata": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+        "cv_scores": { "type": "array", "items": { "type": "number" } },
+        "bootstrap_reps": { "type": "integer", "minimum": 0 },
+        "seed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "projections": {
+      "type": "object",
+      "description": "Opaque per-backend compiled parameters, keyed by backend id (e.g. 'rawaccel-1.7'). Only the owning backend interprets params.",
+      "additionalProperties": { "$ref": "#/$defs/projection" }
+    },
+    "validation": {
+      "description": "A/B validation result (D8). Placeholder in v1.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["status"],
+          "additionalProperties": true,
+          "properties": {
+            "status": { "enum": ["none", "pending", "passed", "failed", "inconclusive"] },
+            "backend": { "type": "string" },
+            "metric": { "type": "string" },
+            "effect": { "type": "number" },
+            "ci_low": { "type": "number" },
+            "ci_high": { "type": "number" },
+            "sessions": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "projection": {
+      "type": "object",
+      "required": ["params"],
+      "additionalProperties": true,
+      "properties": {
+        "params": { "type": "object", "description": "Backend-specific, opaque to Core." },
+        "created_at": { "type": "string", "format": "date-time" },
+        "residual_rms": { "type": "number", "minimum": 0 },
+        "explained_var": { "type": "number" },
+        "max_tilt_deg": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

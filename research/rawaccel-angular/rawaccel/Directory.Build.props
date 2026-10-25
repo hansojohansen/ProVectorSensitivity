@@ -1,0 +1,21 @@
+<!--
+  OpenVector RESEARCH build (not part of upstream Raw Accel).
+  This file also stops MSBuild from picking up the OpenVector product Directory.Build.props
+  further up the tree, so the research fork never mixes with product build settings (D11).
+
+  The WDK and the matching Windows SDK come from NuGet (restored into .\packages by
+  build.ps1 or the research-driver workflow) and are imported for the kernel driver project
+  only. User-mode projects (wrapper, writer, installer) use the Visual Studio 2022 SDK.
+-->
+<Project>
+  <PropertyGroup>
+    <OvWdkVersion Condition="'$(OvWdkVersion)' == ''">10.0.26100.6584</OvWdkVersion>
+    <OvPkgDir>$(MSBuildThisFileDirectory)packages\</OvPkgDir>
+    <OvIsDriver Condition="'$(MSBuildProjectName)' == 'driver' and '$(MSBuildProjectExtension)' == '.vcxproj'">true</OvIsDriver>
+  </PropertyGroup>
+  <ImportGroup Condition="'$(OvIsDriver)' == 'true' and '$(Platform)' == 'x64'">
+    <Import Project="$(OvPkgDir)Microsoft.Windows.SDK.CPP.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.SDK.CPP.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.props')" />
+    <Import Project="$(OvPkgDir)Microsoft.Windows.SDK.CPP.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.SDK.CPP.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
+    <Import Project="$(OvPkgDir)Microsoft.Windows.WDK.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props" Condition="Exists('$(OvPkgDir)Microsoft.Windows.WDK.x64.$(OvWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props')" />
+  </ImportGroup>
+</Project>

@@ -1,10 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Multi-targeted on purpose:
+      net10.0-windows : the full library (raw-input capture thread, device enumeration, P/Invoke).
+      net10.0         : only the platform-neutral parts (ring buffer, RAWINPUT buffer parser, timing
+                        reconstruction, binary log, decoders) so they can be unit-tested on Linux CI.
+    Everything under Windows/ is Windows-only and is compiled for net10.0-windows only.
+  -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>OpenVector.Capture</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Remove="Windows/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenVector.Capture.Tests" />
+  </ItemGroup>
 
 </Project>

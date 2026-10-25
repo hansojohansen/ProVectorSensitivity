@@ -1,0 +1,1356 @@
+{
+ "seed": 42,
+ "sectors": 32,
+ "amplitudes": [
+  5.0,
+  15.0,
+  30.0
+ ],
+ "reps": 2,
+ "trials": [
+  {
+   "sector": 25,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.944220733295658,
+   "index": 0
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.916204156746795,
+   "index": 1
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.407358608711246,
+   "index": 2
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.694006690968576,
+   "index": 3
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.512435329853327,
+   "index": 4
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.033587116958445,
+   "index": 5
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.8408043625611699,
+   "index": 6
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.4171239885336426,
+   "index": 7
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.8741344249088299,
+   "index": 8
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.25537847180674045,
+   "index": 9
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 6.036706462316627,
+   "index": 10
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.13840715101756382,
+   "index": 11
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.8032185163545031,
+   "index": 12
+  },
+  {
+   "sector": 25,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.971520060030065,
+   "index": 13
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.5977611812665646,
+   "index": 14
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.569460097103505,
+   "index": 15
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.6125750350355377,
+   "index": 16
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 6.089411042219652,
+   "index": 17
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.9581902495805052,
+   "index": 18
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.2367235596520536,
+   "index": 19
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.8414558511822485,
+   "index": 20
+  },
+  {
+   "sector": 25,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.928306974243189,
+   "index": 21
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.83837236762784,
+   "index": 22
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.5030260198823937,
+   "index": 23
+  },
+  {
+   "sector": 25,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.89683593630856,
+   "index": 24
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.2293847505048705,
+   "index": 25
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.125072477351158,
+   "index": 26
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.39532940298774283,
+   "index": 27
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.481093213720878,
+   "index": 28
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.428400325836079,
+   "index": 29
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.175219084357077,
+   "index": 30
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.461682474181642,
+   "index": 31
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.4571450180306593,
+   "index": 32
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.5717527776632412,
+   "index": 33
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.07230141375775537,
+   "index": 34
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.6753053886878453,
+   "index": 35
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.5548502877186112,
+   "index": 36
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 6.252592225908934,
+   "index": 37
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.486457213160601,
+   "index": 38
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.490879748183308,
+   "index": 39
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.616217425942917,
+   "index": 40
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.7017848341741197,
+   "index": 41
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.1111528332238112,
+   "index": 42
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.674091439467495,
+   "index": 43
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.1410585299291844,
+   "index": 44
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.929125645304737,
+   "index": 45
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.3393770476153153,
+   "index": 46
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.818192702723987,
+   "index": 47
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.290197825337589,
+   "index": 48
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.1321618253721253,
+   "index": 49
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.9876788276572142,
+   "index": 50
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.7781345692078492,
+   "index": 51
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.6788442229817636,
+   "index": 52
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.1753789670099577,
+   "index": 53
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.3344687015777832,
+   "index": 54
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.8044776535351996,
+   "index": 55
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.5052179261441858,
+   "index": 56
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.085138584581111,
+   "index": 57
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.399766694642202,
+   "index": 58
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.122250968913122,
+   "index": 59
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.6261481560142563,
+   "index": 60
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.07969891136099,
+   "index": 61
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.2774533626922375,
+   "index": 62
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.8805077780976154,
+   "index": 63
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.9849980114882768,
+   "index": 64
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.748217345980431,
+   "index": 65
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.398655283838515,
+   "index": 66
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.8721703908286205,
+   "index": 67
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.407951274953925,
+   "index": 68
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.16492007383648466,
+   "index": 69
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.5096329453766835,
+   "index": 70
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.19497297069916975,
+   "index": 71
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.39662868388670103,
+   "index": 72
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.764204056913124,
+   "index": 73
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.195662383487957,
+   "index": 74
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.5518394230238255,
+   "index": 75
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 6.087153042724462,
+   "index": 76
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.2928599737038389,
+   "index": 77
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.184037630549716,
+   "index": 78
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.5449109164318382,
+   "index": 79
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.8176354789133935,
+   "index": 80
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.877984794430095,
+   "index": 81
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.9974729213842943,
+   "index": 82
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.015276925388317,
+   "index": 83
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.3148610648934915,
+   "index": 84
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.304400586231316,
+   "index": 85
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.0486079591563364,
+   "index": 86
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.707846450875397,
+   "index": 87
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.035091307768818,
+   "index": 88
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.1937941880157887,
+   "index": 89
+  },
+  {
+   "sector": 1,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.21961344017727277,
+   "index": 90
+  },
+  {
+   "sector": 25,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.980923253786664,
+   "index": 91
+  },
+  {
+   "sector": 25,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.932706095478945,
+   "index": 92
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.0832599394254165,
+   "index": 93
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.680910038084713,
+   "index": 94
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.346386100218626,
+   "index": 95
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.93664086986955,
+   "index": 96
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.412521811263884,
+   "index": 97
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.5029227291745813,
+   "index": 98
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.867168838926247,
+   "index": 99
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.8572250485922406,
+   "index": 100
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.9957510589107748,
+   "index": 101
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.255414761159344,
+   "index": 102
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.4251280561761966,
+   "index": 103
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.3923333928399897,
+   "index": 104
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.69080022262538,
+   "index": 105
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.3042521981104735,
+   "index": 106
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.7914360333015935,
+   "index": 107
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.9463051565446605,
+   "index": 108
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.5230231757691652,
+   "index": 109
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.3218469481538695,
+   "index": 110
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.267909656825991,
+   "index": 111
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.5424331335718104,
+   "index": 112
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 6.144020462568674,
+   "index": 113
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.101786559550451,
+   "index": 114
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.387114549239842,
+   "index": 115
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.3298880913595863,
+   "index": 116
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.25682226705836,
+   "index": 117
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.2431742092355282,
+   "index": 118
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.5092183293546323,
+   "index": 119
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.78184250045042,
+   "index": 120
+  },
+  {
+   "sector": 3,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.6086475079947598,
+   "index": 121
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.363064767607383,
+   "index": 122
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.07517235635423,
+   "index": 123
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.0922974033461474,
+   "index": 124
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.919140176237525,
+   "index": 125
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.5190319053849555,
+   "index": 126
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 6.016262095349212,
+   "index": 127
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.5354832272862684,
+   "index": 128
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.468194573228405,
+   "index": 129
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.968793909689253,
+   "index": 130
+  },
+  {
+   "sector": 6,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.0979801464572054,
+   "index": 131
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 6.216408868973329,
+   "index": 132
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.126108011833651,
+   "index": 133
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.681948907858922,
+   "index": 134
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.336416759903453,
+   "index": 135
+  },
+  {
+   "sector": 31,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 6.029723491403127,
+   "index": 136
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.83462219276822,
+   "index": 137
+  },
+  {
+   "sector": 13,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.516739580488774,
+   "index": 138
+  },
+  {
+   "sector": 11,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.2377829094061323,
+   "index": 139
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.5978357945743737,
+   "index": 140
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.587983276112025,
+   "index": 141
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.3816311077785284,
+   "index": 142
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.0106296664456877,
+   "index": 143
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 1.0087514925504202,
+   "index": 144
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.6178768904171426,
+   "index": 145
+  },
+  {
+   "sector": 8,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.6629571538577221,
+   "index": 146
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 0.8329106890002305,
+   "index": 147
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.9929572608799995,
+   "index": 148
+  },
+  {
+   "sector": 10,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.0547592022817374,
+   "index": 149
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 6.192477742886206,
+   "index": 150
+  },
+  {
+   "sector": 28,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.467976414105968,
+   "index": 151
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.4146865443660515,
+   "index": 152
+  },
+  {
+   "sector": 7,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.4074913617446239,
+   "index": 153
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.778419913866143,
+   "index": 154
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.753120747393109,
+   "index": 155
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.7964172506853044,
+   "index": 156
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 3.6726548624778315,
+   "index": 157
+  },
+  {
+   "sector": 30,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.9831938440925105,
+   "index": 158
+  },
+  {
+   "sector": 2,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.3918152452931221,
+   "index": 159
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 2.422009911762306,
+   "index": 160
+  },
+  {
+   "sector": 26,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.1242201221978725,
+   "index": 161
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.701380885096268,
+   "index": 162
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.8497474649431536,
+   "index": 163
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.1837165542837345,
+   "index": 164
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.7417236205877143,
+   "index": 165
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 6.239713740760615,
+   "index": 166
+  },
+  {
+   "sector": 20,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.8991493430368838,
+   "index": 167
+  },
+  {
+   "sector": 0,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 0.04743115303217932,
+   "index": 168
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.0386710595276993,
+   "index": 169
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.7932792503425516,
+   "index": 170
+  },
+  {
+   "sector": 18,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.623387285224377,
+   "index": 171
+  },
+  {
+   "sector": 22,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.412204593569878,
+   "index": 172
+  },
+  {
+   "sector": 14,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.808495094594555,
+   "index": 173
+  },
+  {
+   "sector": 21,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.112652543970948,
+   "index": 174
+  },
+  {
+   "sector": 12,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 2.4183990234172765,
+   "index": 175
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 4.45363388572513,
+   "index": 176
+  },
+  {
+   "sector": 4,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 0.8235248409586314,
+   "index": 177
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 5.320883069079172,
+   "index": 178
+  },
+  {
+   "sector": 27,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 5.32755394391478,
+   "index": 179
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.2804575825671725,
+   "index": 180
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.0879001037593445,
+   "index": 181
+  },
+  {
+   "sector": 29,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 5.608304707036533,
+   "index": 182
+  },
+  {
+   "sector": 16,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.182689992043741,
+   "index": 183
+  },
+  {
+   "sector": 23,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 4.601671136868933,
+   "index": 184
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.8275540169725595,
+   "index": 185
+  },
+  {
+   "sector": 19,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 3.7302477135508365,
+   "index": 186
+  },
+  {
+   "sector": 24,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 4.707737979629904,
+   "index": 187
+  },
+  {
+   "sector": 9,
+   "amplitude_index": 0,
+   "amplitude": 5.0,
+   "theta": 1.8304690483969885,
+   "index": 188
+  },
+  {
+   "sector": 17,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 3.245330434440917,
+   "index": 189
+  },
+  {
+   "sector": 5,
+   "amplitude_index": 1,
+   "amplitude": 15.0,
+   "theta": 1.037148962067966,
+   "index": 190
+  },
+  {
+   "sector": 15,
+   "amplitude_index": 2,
+   "amplitude": 30.0,
+   "theta": 2.983377757459727,
+   "index": 191
+  }
+ ]
+}

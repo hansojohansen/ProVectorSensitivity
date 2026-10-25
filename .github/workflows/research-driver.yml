@@ -1,0 +1,74 @@
+# OpenVector RESEARCH driver build (D11). RESEARCH ONLY - NOT A RELEASE.
+#
+# Builds the research fork of Raw Accel 1.7.1 with the angle x speed gain table from
+# research/rawaccel-angular/, test-signs rawaccel.sys with a throw-away self-signed certificate
+# and uploads it as the artifact "RESEARCH-ONLY-test-signed-rawaccel-angular".
+#
+# - Manual trigger only (workflow_dispatch). Never runs on push/PR, never publishes a release.
+# - The product CI, installer and app never reference research/ (enforced by tools/lint/ovlint.py).
+# - The output loads only in Windows test-signing mode. Never use it with anticheat-protected
+#   games. Read research/rawaccel-angular/GUIDE.md first.
+# - The certificate's private key is generated on the runner as non-exportable and deleted at the
+#   end of the job; only the public .cer is uploaded.
+name: Research driver (RESEARCH ONLY, test-signed)
+
+on:
+  workflow_dispatch:
+    inputs:
+      spectre:
+        description: "Build with Spectre mitigation (needs the MSVC Spectre libs on the runner)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-driver-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host-tests:
+    name: Host tests of the gain-table math (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vendored tree matches upstream 1.7.1 + committed patch
+        run: research/rawaccel-angular/scripts/make-patch.sh --check
+      - name: Unit + equivalence tests (g++ and clang++)
+        run: research/rawaccel-angular/test/run.sh
+
+  build:
+    name: Build + test-sign (Windows)
+    needs: host-tests
+    runs-on: windows-2025   # Visual Studio 2022 (v143), required by the upstream projects
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Build and test-sign
+        shell: powershell   # Windows PowerShell 5.1: New-SelfSignedCertificate / cert provider
+        run: |
+          $buildArgs = @{ TestSign = $true }
+          if ('${{ inputs.spectre }}' -eq 'false') { $buildArgs.NoSpectre = $true }
+          & research\rawaccel-angular\build.ps1 @buildArgs
+
+      - name: Show artifact contents
+        shell: powershell
+        run: |
+          $out = 'research\rawaccel-angular\out\RESEARCH-ONLY-test-signed'
+          Get-ChildItem $out -Recurse -File | Select-Object FullName, Length | Format-Table -AutoSize | Out-String -Width 300
+          Get-Content (Join-Path $out 'SHA256SUMS.txt')
+          (Get-Item (Join-Path $out 'driver\rawaccel.sys')).VersionInfo | Format-List FileDescription, ProductName, FileVersion
+
+      - name: Upload RESEARCH-ONLY artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RESEARCH-ONLY-test-signed-rawaccel-angular
+          path: research/rawaccel-angular/out/RESEARCH-ONLY-test-signed/
+          if-no-files-found: error
+          retention-days: 14

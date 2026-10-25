@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "session_id": "example-session",
+  "kind": "calibration",
+  "clock": {
+    "type": "qpc_us",
+    "qpc_frequency_hz": 10000000,
+    "utc_offset_us": 1793000000000000
+  },
+  "started_at": "2026-10-25T19:30:00+02:00",
+  "ended_at": "2026-10-25T19:52:10+02:00",
+  "t_start_us": 1000000,
+  "t_end_us": 1331000000,
+  "duration_us": 1330000000,
+  "trainer": {
+    "version": "0.1.0",
+    "protocol_id": "ov-flick-32x3",
+    "seed": 42,
+    "plan": {
+      "sectors": 32,
+      "amplitudes_deg": [
+        5,
+        15,
+        30
+      ],
+      "reps": 7
+    }
+  },
+  "device": {
+    "vid": 1133,
+    "pid": 50503,
+    "name": "example mouse",
+    "dpi": 800,
+    "polling_hz_nominal": 1000,
+    "polling_hz_measured": 999.7
+  },
+  "display": {
+    "refresh_hz": 240,
+    "resolution": [
+      2560,
+      1440
+    ],
+    "vrr": false,
+    "present_mode": "flip_discard"
+  },
+  "view": {
+    "yaw_deg_per_count": 0.022,
+    "pitch_deg_per_count": 0.022,
+    "fov_h_deg": 103,
+    "fov_scaling": "hor+",
+    "cm_per_360": 51.95,
+    "game_preset": "cs2"
+  },
+  "rawaccel": {
+    "detected": true,
+    "version": "1.7.1",
+    "settings_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "active_gain_map_id": "identity",
+  "breaks": [
+    {
+      "t_start_us": 400000000,
+      "t_end_us": 430000000,
+      "reason": "scheduled"
+    }
+  ],
+  "self_report": {
+    "warmed_up": true,
+    "fatigue_1_5": 2
+  },
+  "streams": [
+    {
+      "kind": "raw_input",
+      "path": "raw_input.parquet",
+      "format": "ov-raw-input",
+      "format_schema_version": "1.0.0",
+      "compression": "parquet-internal"
+    },
+    {
+      "kind": "frames",
+      "path": "frames.parquet",
+      "format": "ov-frames",
+      "format_schema_version": "1.0.0",
+      "compression": "parquet-internal"
+    },
+    {
+      "kind": "events",
+      "path": "events.jsonl.zst",
+      "format": "ov-events-jsonl",
+      "format_schema_version": "1.0.0",
+      "compression": "zstd"
+    },
+    {
+      "kind": "trials",
+      "path": "trials.jsonl",
+      "format": "ov-movement-trial-jsonl",
+      "format_schema_version": "1.0.0",
+      "compression": "none",
+      "records": 672
+    }
+  ]
+}

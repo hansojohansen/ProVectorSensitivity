@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Spike S1 (research C §7): measures raw-input capture timing at up to 8 kHz on the user's PC. Windows only. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>OpenVector.Tools.CaptureSpike</RootNamespace>
+    <AssemblyName>CaptureSpike</AssemblyName>
+    <!-- Workstation, non-concurrent-by-default settings keep GC behaviour close to the future trainer. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OpenVector.Capture\OpenVector.Capture.csproj" />
+  </ItemGroup>
+
+</Project>

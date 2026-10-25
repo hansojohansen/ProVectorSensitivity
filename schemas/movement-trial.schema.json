@@ -1,0 +1,740 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openvector.dev/schemas/movement-trial/1.0.0",
+  "title": "OpenVector MovementTrial v1",
+  "description": "One aimed movement (flick) from any DataSource. Source-agnostic (research B §7.1). Conventions (DECISIONS D14): positions are cumulative raw mouse counts relative to the trial origin, x right, y DOWN; theta = atan2(dy, dx) in radians in [0, 2pi), 0 = right, pi/2 = down; times are int64 microseconds on a monotonic QPC-derived clock. Angles in degrees (yaw/pitch) are optional and informational; analysis uses counts. Per D15 a MovementTrial is a DERIVED view of the lossless session streams (session.schema.json); it can always be regenerated from them.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "trial_id",
+    "session_id",
+    "source",
+    "provenance",
+    "mapping",
+    "geometry",
+    "outcome",
+    "timing",
+    "kinematics"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of this schema. Major 1 = this file."
+    },
+    "trial_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "builtin",
+            "kovaaks_hybrid",
+            "osu",
+            "aimlabs",
+            "synthetic",
+            "other"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "scenario_id": {
+          "type": "string"
+        },
+        "protocol_id": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "target_truth",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "target_truth": {
+          "enum": [
+            "measured",
+            "inferred",
+            "unknown"
+          ]
+        },
+        "inference_method": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fitter weight multiplier. builtin trials use 1."
+        }
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "vid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "name": {
+          "type": "string"
+        },
+        "polling_hz_nominal": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "polling_hz_measured": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "dpi": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": [
+        "yaw_deg_per_count",
+        "pitch_deg_per_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "yaw_deg_per_count": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "pitch_deg_per_count": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fov_h_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 180
+        },
+        "fov_scaling": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Game FOV convention, e.g. 'hor+', 'vertical', '4:3-hor'."
+        },
+        "resolution": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "aspect": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "counts_stage": {
+          "enum": [
+            "post_driver",
+            "pre_driver"
+          ],
+          "default": "post_driver",
+          "description": "Whether counts were taken after (default, what the game sees) or before the Raw Accel filter."
+        }
+      }
+    },
+    "active_gain_map_id": {
+      "type": "string",
+      "default": "identity",
+      "description": "Profile id in effect during the trial, or 'identity'."
+    },
+    "condition": {
+      "type": "object",
+      "description": "Design cell from the trial plan, if any.",
+      "additionalProperties": false,
+      "properties": {
+        "trial_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "block": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sector": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sector_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "amplitude_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width_index": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "required": [
+        "start",
+        "target",
+        "amplitude_counts",
+        "direction_theta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/point"
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "amplitude_counts": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "|target - start| in counts (D12: logged for every trial)."
+        },
+        "amplitude_deg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "direction_theta": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 6.283185307179587,
+          "description": "atan2(target.y - start.y, target.x - start.x) in count space, radians (D14)."
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": [
+        "endpoint_primary",
+        "endpoint_final"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "endpoint_primary": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Position at the end of the primary (open-loop) submovement."
+        },
+        "endpoint_final": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/point"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Position at the final click / selection."
+        },
+        "hit": {
+          "type": "boolean"
+        },
+        "shots_fired": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "clicks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "t_us",
+              "x_counts",
+              "y_counts"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "t_us": {
+                "type": "integer"
+              },
+              "x_counts": {
+                "type": "number"
+              },
+              "y_counts": {
+                "type": "number"
+              },
+              "hit": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "object",
+          "description": "Derived (recomputed by OpenVector.Core analysis; informational). Fractions of amplitude. along = (P - S).u / A - 1; across = (P - S).n / A with n = u rotated by +pi/2 in theta.",
+          "additionalProperties": false,
+          "properties": {
+            "along_primary": {
+              "type": "number"
+            },
+            "across_primary": {
+              "type": "number"
+            },
+            "along_final": {
+              "type": "number"
+            },
+            "across_final": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "required": [
+        "t_stimulus_us"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "clock": {
+          "const": "qpc_us",
+          "default": "qpc_us"
+        },
+        "utc_offset_us": {
+          "type": "integer",
+          "description": "UTC (unix epoch µs) = t + utc_offset_us."
+        },
+        "t_stimulus_us": {
+          "type": "integer",
+          "description": "Stimulus reference time = when the trainer requested the target spawn (simulation time, QPC µs). Positions are relative to the view at this time."
+        },
+        "t_onset_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "t_peak_velocity_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "t_primary_end_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "t_final_click_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "reaction_time_us": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "t_onset - t_stimulus_on_screen_us when known, else t_onset - t_stimulus_us; see reaction_time_basis."
+        },
+        "movement_time_us": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "t_final_click - t_onset."
+        },
+        "primary_duration_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "t_stimulus_on_screen_us": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Estimated first-frame-on-screen time of the target (from DXGI present/vblank stats, D15). Excludes the unmeasurable panel/photon delay."
+        },
+        "reaction_time_basis": {
+          "enum": [
+            "on_screen",
+            "requested",
+            null
+          ]
+        }
+      }
+    },
+    "kinematics": {
+      "type": "object",
+      "required": [
+        "peak_speed_counts_per_s"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "peak_speed_counts_per_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "D12: logged for every trial (smoothed, see Core Segmenter)."
+        },
+        "peak_speed_deg_per_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "path_length_counts": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "n_corrections": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "submovements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "t_start_us",
+              "t_end_us",
+              "dx_counts",
+              "dy_counts",
+              "peak_speed_counts_per_s"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "t_start_us": {
+                "type": "integer"
+              },
+              "t_end_us": {
+                "type": "integer"
+              },
+              "dx_counts": {
+                "type": "number"
+              },
+              "dy_counts": {
+                "type": "number"
+              },
+              "peak_speed_counts_per_s": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "segmentation": {
+          "type": "string",
+          "description": "Algorithm id + params that produced submovements, e.g. 'ov-velocity-1'."
+        }
+      }
+    },
+    "path": {
+      "description": "Raw, unaccumulated per-packet counts (columnar). Optional; large streams go to Parquet via path_ref.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "t_us",
+            "dx",
+            "dy"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "t_us": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "dx": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "dy": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "buttons": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "path_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "URI/relative path of the Parquet raw stream (columns t_us, dx, dy, buttons)."
+    },
+    "excluded_reason": {
+      "enum": [
+        null,
+        "miss",
+        "pause",
+        "chained",
+        "segmentation_ambiguous",
+        "outlier",
+        "other"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "context": {
+      "type": "object",
+      "description": "Per-trial sequential/session context (D15). Diagnostic; never applied by a static profile.",
+      "additionalProperties": false,
+      "properties": {
+        "trial_index_session": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "trial_index_block": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "block": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "previous": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "direction_theta",
+                "amplitude_counts"
+              ],
+              "properties": {
+                "trial_id": {
+                  "type": "string"
+                },
+                "direction_theta": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 6.283185307179587
+                },
+                "amplitude_counts": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "hit": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "excluded_reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "along_primary": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "inter_trial_interval_us": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Previous trial's final click (or end) to this trial's stimulus request."
+        },
+        "time_since_break_us": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Since the end of the last break, or since session start."
+        },
+        "time_since_session_start_us": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this view was derived (D15).",
+      "properties": {
+        "deriver": {
+          "type": "string",
+          "description": "Algorithm id + version, e.g. 'ov-trialize-1'."
+        },
+        "session_file": {
+          "type": "string",
+          "description": "Relative path of the session.json this trial came from."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "object",
+      "required": [
+        "x_counts",
+        "y_counts"
+      ],
+      "properties": {
+        "x_counts": {
+          "type": "number"
+        },
+        "y_counts": {
+          "type": "number",
+          "description": "Positive = down (D14)."
+        },
+        "yaw_deg": {
+          "type": "number"
+        },
+        "pitch_deg": {
+          "type": "number",
+          "description": "Positive = up (game convention); informational."
+        }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "x_counts",
+        "y_counts",
+        "radius_counts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x_counts": {
+          "type": "number"
+        },
+        "y_counts": {
+          "type": "number",
+          "description": "Positive = down (D14)."
+        },
+        "yaw_deg": {
+          "type": "number"
+        },
+        "pitch_deg": {
+          "type": "number",
+          "description": "Positive = up (game convention); informational."
+        },
+        "radius_counts": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "radius_deg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shape": {
+          "enum": [
+            "sphere",
+            "disc",
+            "box",
+            "other"
+          ]
+        },
+        "velocity_x_counts_per_s": {
+          "type": "number"
+        },
+        "velocity_y_counts_per_s": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}
