@@ -60,6 +60,15 @@ cannot be applied exactly. Only its 5-DOF projection can.
 (1-count vectors). The κ term is per-packet, so it is only approximately right there. ρ, L and U are exact.
 The QA agent will measure this.
 
+**Revision (user, 2026-10-25).** The user judged that a map limited to essentially four axis gains is
+too weak to give a real advantage. Measurement therefore targets **full resolution from day one**:
+- **Flick directions are drawn from continuous angles,** balanced by stratifying them over 32 sectors.
+- **The fit is a Fourier series over angle,** with order up to 8 (about 20° features). It is displayed at 64 bins.
+- **The per-bin minimum (D9) becomes a minimum per 32-sector stratum.**
+
+The stock 5-DOF projection stays the safe, shippable default. Whether the full map is worth it is
+answered empirically by the research driver (D11).
+
 ## D3. Upstream: support a true angular LUT in Raw Accel — Accepted
 - Two unreviewed upstream PRs already exist: **#352** (an angle→multiplier LUT with 128 points that keeps
   movement direction, so the closest fit) and #349 (8 sectors).
@@ -68,7 +77,12 @@ The QA agent will measure this.
 - Expectation: **6–18 months or never**. Signed releases are rare, and only the original author's EV certificate can sign them.
 - **Phase 1 does not depend on this.**
 
-## D4. Applying, persistence, coexistence and reset — Proposed (needs user approval for the logon task)
+## D4. Applying, persistence, coexistence and reset — Accepted (user approved the logon task on 2026-10-25, on condition it is easy to toggle)
+**Toggle requirement.** The logon task is **off until the user turns it on**. The app's main screen has
+an on/off switch for it ("Re-apply profile at Windows sign-in") showing its current state, and
+reset-to-neutral and uninstall always remove it. The task is named `OpenVector\ReapplyRawAccel`, so it is
+also visible and removable in Task Scheduler.
+
 - **Apply.**
   1. Read the user's existing Raw Accel `settings.json`.
   2. Make a timestamped backup in `%LOCALAPPDATA%\OpenVector\backups\`.
@@ -154,6 +168,44 @@ The QA agent will measure this.
 - At least 20 valid trials per bin before a bin influences the fit. Otherwise the fit shrinks towards the
   neighbouring bins, then towards 1.0.
 - Bootstrap CIs are reported for every bin and every projected parameter.
+
+## D11. Research driver build (NOT anticheat-safe, never shipped) — Accepted (user, 2026-10-25)
+**Purpose.** Measure how much better a full-resolution map is than the stock 5-DOF projection, before we
+spend effort on upstream or hardware.
+
+**What it is.** A research fork of Raw Accel at v1.7.1, kept in `research/rawaccel-angular/` (MIT, with
+attribution kept). It adds a direction-preserving **angle × speed gain table** to the driver: a periodic
+angle axis plus an optional speed axis, interpolated bilinearly. It is modelled on upstream PR #352 and
+kept stateless, so it can be proposed upstream.
+
+**Safety rules.**
+- It is **test-signed only.** It requires Windows test-signing mode, which usually means turning off Secure
+  Boot. Vanguard and FACEIT refuse to run in that mode, and other anticheats may flag it.
+- **Use it only with our trainer and offline games.**
+- The guide covers:
+  - suspending BitLocker before changing Secure Boot;
+  - reinstalling the official signed Raw Accel driver afterwards;
+  - turning test-signing off again.
+- **The installer, app and release pipeline never ship or reference it.**
+- The QA linter fails the build if any product project references `research/`.
+
+**Experiment.** Blind, interleaved A/B/C on the same calibration data:
+- A = identity;
+- B = the stock 5-DOF projection;
+- C = the full-resolution map.
+
+The main metric is Fitts throughput; we also look at per-direction error. The results feed the upstream PR evidence (D3) and the hardware decision (D10).
+
+## D12. Speed/distance-dependent gain — Accepted
+- **The trainer logs amplitude and peak speed** for every trial. The model gets an optional speed dimension: g(θ, v) is a tensor product of a Fourier series in θ and a spline in log v.
+- **Stock Raw Accel projection:** horizontal and vertical speed curves via its "by component" mode.
+  Left/right and up/down asymmetry stays constant, not speed-dependent.
+- **Research driver:** the full angle × speed table.
+- **Default scope:** this is Phase 2 by default. Logging the data is in Phase 1, so no recalibration is needed later.
+
+## D13. User hardware — Recorded
+- The test machine is the user's Windows PC with a Logitech G Pro wireless (2nd gen; exact model, DPI and polling rate to be confirmed in G HUB).
+- Recent Logitech Lightspeed mice support up to 8 kHz polling, so it is a suitable stress-test device.
 
 ## D10. Hardware dongle variant — Parked
 This is a closed-source commercial USB pass-through device. It is outside this project's scope; see `CLAUDE.md`.

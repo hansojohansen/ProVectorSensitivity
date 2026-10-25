@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OpenVector.Capture/OpenVector.Capture.csproj" />
+    <Project Path="src/OpenVector.Core/OpenVector.Core.csproj" />
+    <Project Path="src/OpenVector.RawAccel/OpenVector.RawAccel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OpenVector.Core.Tests/OpenVector.Core.Tests.csproj" />
+    <Project Path="tests/OpenVector.RawAccel.Tests/OpenVector.RawAccel.Tests.csproj" />
+  </Folder>
+</Solution>
