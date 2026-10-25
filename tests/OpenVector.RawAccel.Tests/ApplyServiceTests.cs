@@ -194,7 +194,7 @@ public class ApplyServiceTests : IDisposable
         Assert.True(status.FileMatchesLastWrite);
         Assert.Equal("revert", status.LastOperation);
         Assert.Equal(BaselineSource.CurrentFile, _svc.GetBaseline(_loc).Source);
-        Assert.Equal(3, _svc.Backups.List().Count + 1); // apply backup + revert backup (+ the original is the first)
+        Assert.Equal(2, _svc.Backups.List().Count); // one before apply, one before revert
     }
 
     [Fact]

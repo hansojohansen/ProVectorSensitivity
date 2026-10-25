@@ -264,3 +264,19 @@ lossless **session streams** recorded **only inside our trainer during a calibra
 - The model must stay static outside calibration (constraint 2). Richer data only changes what a *calibration* can fit.
   - Sequential effects, such as previous-direction dependence, **cannot** be applied by a static profile in any case: the driver doesn't know the previous flick's intent.
   - They are research or diagnostic outputs unless a later decision says otherwise.
+
+## D16. Baseline composition and reset semantics — Accepted (PM, from Input/Driver report)
+**Baseline composition.**
+- The fitted Raw Accel parameters are **multipliers on top of the user's pre-OpenVector settings**: Output DPI, Y/X, L/R, U/D and rotation. We call these the *baseline*.
+- The baseline is captured at first apply, and Apply refuses to write if it no longer matches the file.
+- Calibration always runs against the **baseline profile**, never against an already-applied OpenVector profile. This means the App asks `ApplyService.GetBaseline()` before a session, and the trainer runs with the baseline active.
+- Output DPI is composed as `baseline Output DPI × G0 / c`, which preserves the user's base sensitivity.
+
+**Reset semantics.**
+- **"Reset" (default)** restores the baseline, so ratios the user chose themselves are kept.
+- **"Full neutral"** (Y/X = L/R = U/D = 1, no LUT) is a separate, explicit option.
+- Both remove the logon task.
+
+**Other points.**
+- `IProjectionBackend` lives in `OpenVector.RawAccel` for now. Core stays independent (D14), and the App wires the two together.
+- If writer.exe fails at sign-in, its error dialog appears at logon. This is acceptable and is documented in the user guide.
