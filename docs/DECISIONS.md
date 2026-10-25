@@ -222,3 +222,45 @@ These conventions apply to every schema and API. Changing any of them goes throu
 - **Time:** int64 microseconds on a monotonic clock derived from QPC, with a recorded offset to UTC.
 - **Interface between Core and RawAccel.** Projection backends take a sampled target
   `(theta[], gain[], weight[])` and do not depend on Core types. Core converts its Fourier model to those samples.
+
+## D15. Log everything raw in calibration sessions, derive later — Accepted (user, 2026-10-25)
+The user wants far more data than the current model needs, so that patterns can be found later. Examples
+are sequential effects (a flick right followed by a flick left), stimulus-to-movement delay, fatigue and
+warm-up. The trial summary (`MovementTrial`) is therefore a **derived view**. The source of truth is a set of
+lossless **session streams** recorded **only inside our trainer during a calibration session** (D5).
+
+**Raw input stream: every packet.**
+- QPC read time and batch index.
+- Device handle, dx/dy, button transitions and wheel/h-wheel.
+- Raw flags and `ulExtraInformation`, which holds the pre-Raw Accel counts.
+- Packet drop and coalescing markers.
+
+**Frame stream: every frame.**
+- Frame id, simulation time, present-call QPC, and DXGI frame statistics (present/vblank QPC).
+- Camera yaw/pitch.
+- All target states (position, velocity, size, visible).
+- The input packets consumed by that frame.
+
+**Event stream.**
+- Target spawn requested, first frame on screen (estimated from vblank), hit/miss and click down/up.
+- Task phase changes, pauses, focus loss and window changes.
+
+**Session context.**
+- Device VID/PID/name, DPI, nominal and measured polling rate.
+- Monitor refresh rate and resolution, FOV and deg/count.
+- Active Raw Accel settings hash and the active profile id.
+- Trainer version and seed, time of day, session duration and break times.
+- Optional self-reports: warm-up yes/no, fatigue on a 1–5 scale.
+
+**Per-trial context fields.**
+- Previous trial's direction, amplitude and outcome.
+- Inter-trial interval and the trial's index in the session and the block.
+- Time since the last break.
+
+**Notes and limits.**
+- Stimulus-to-photon latency can't be measured without external hardware, such as a photodiode. We log present/vblank times and
+  the monitor refresh rate so that the display-side delay is bounded and consistent.
+- Streams are compressed and stored locally. Nothing is uploaded.
+- The model must stay static outside calibration (constraint 2). Richer data only changes what a *calibration* can fit.
+  - Sequential effects, such as previous-direction dependence, **cannot** be applied by a static profile in any case: the driver doesn't know the previous flick's intent.
+  - They are research or diagnostic outputs unless a later decision says otherwise.
