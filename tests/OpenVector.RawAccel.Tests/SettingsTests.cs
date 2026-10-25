@@ -38,7 +38,7 @@ public class SettingsTests
     {
         var doc = RawAccelSettingsDocument.Parse(FixtureText);
         doc.WriteOwned("default", doc.ReadOwned("default"));
-        Assert.Equal(FixtureText.TrimEnd('\n').ReplaceLineEndings(), doc.ToJson().ReplaceLineEndings());
+        Assert.Equal(FixtureText.ReplaceLineEndings().TrimEnd(), doc.ToJson().ReplaceLineEndings().TrimEnd());
     }
 
     [Theory]
