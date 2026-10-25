@@ -34,7 +34,7 @@ jsonschema = pytest.importorskip("jsonschema")
 def test_examples_validate(name):
     schema = json.load(open(os.path.join(ROOT, "schemas", f"{name}.schema.json")))
     jsonschema.Draft202012Validator.check_schema(schema)
-    ex = json.load(open(os.path.join(ROOT, "schemas", "examples", f"{name}.example.json")))
+    ex = json.load(open(os.path.join(ROOT, "schemas", "examples", name, "example.json")))
     jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker()).validate(ex)
 
 

@@ -4,7 +4,7 @@
 
 Outputs (overwritten):
     tests/OpenVector.Core.Tests/Golden/*.json
-    schemas/examples/*.json
+    schemas/examples/<schema>/example.json
 """
 import json
 import os
@@ -93,14 +93,14 @@ def main():
     dump(os.path.join(GOLDEN, "fit_sparse.json"), sparse)
 
     # 4. schema examples
-    dump(os.path.join(EXAMPLES, "movement-trial.example.json"), _example_trial(), indent=2)
+    dump(os.path.join(EXAMPLES, "movement-trial", "example.json"), _example_trial(), indent=2)
     prof = profile.make_profile(rich_res, "3f1c2a9e-5b7d-4c1e-9a0b-8d6f4e2c1a00", "2026-10-25T12:00:00+00:00", MAPPING,
                                 ["golden-rich"], name="Golden rich user")
     prof["projections"] = {"rawaccel-1.7": {"params": {"note": "opaque, owned by OpenVector.RawAccel"},
                                             "residual_rms": 0.025, "explained_var": 0.76, "max_tilt_deg": 3.1}}
     prof["validation"] = {"status": "none"}
-    dump(os.path.join(EXAMPLES, "profile.example.json"), prof, indent=2)
-    dump(os.path.join(EXAMPLES, "session.example.json"), _example_session(), indent=2)
+    dump(os.path.join(EXAMPLES, "profile", "example.json"), prof, indent=2)
+    dump(os.path.join(EXAMPLES, "session", "example.json"), _example_session(), indent=2)
     print("golden vectors written to", GOLDEN)
 
 

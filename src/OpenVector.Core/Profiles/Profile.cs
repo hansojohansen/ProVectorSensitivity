@@ -47,6 +47,7 @@ public sealed record ProfileMapping
     public double? Dpi { get; init; }
     public required double YawDegPerCount { get; init; }
     public required double PitchDegPerCount { get; init; }
+    [JsonPropertyName("cm_per_360")]
     public double? CmPer360 { get; init; }
     public double? FovHDeg { get; init; }
     public double? PollingHz { get; init; }

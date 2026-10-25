@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "id": "3f1c2a9e-5b7d-4c1e-9a0b-8d6f4e2c1a00",
   "parent_id": null,
-  "created_at": "2026-10-25T12:00:00Z",
+  "created_at": "2026-10-25T12:00:00+00:00",
   "angle_convention": "atan2_dy_dx_counts_rad",
   "mapping": {
     "dpi": 800,

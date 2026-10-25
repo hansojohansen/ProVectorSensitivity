@@ -66,6 +66,7 @@ public sealed record ViewInfo
     public required double PitchDegPerCount { get; init; }
     public double? FovHDeg { get; init; }
     public string? FovScaling { get; init; }
+    [JsonPropertyName("cm_per_360")]
     public double? CmPer360 { get; init; }
     public string? GamePreset { get; init; }
 }

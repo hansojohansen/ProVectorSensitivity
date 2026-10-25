@@ -18,11 +18,11 @@ Definition of done for each task: code, unit tests and a short README section. C
 | # | Task | Owner | Status | Directory |
 |---|---|---|---|---|
 | 1.1 | Solution skeleton, LICENSE | PM | ✅ | root |
-| 1.2 | CI (Linux + windows-latest), D5 constraint linter, no product reference to `research/`, README and anticheat explainer drafts | QA + Docs/Release | 🔄 | `.github/`, `tools/lint/`, `README.md`, `docs/guide/` |
-| 1.3 | Schemas v1 (profile, movement trial) + C# types; Python reference with synthetic users; C# analysis (segmentation, per-direction metrics, Fitts throughput, Fourier order ≤ 8 fit, regularisation, bootstrap CIs) that recovers injected biases | Calibration | 🔄 | `schemas/`, `src/OpenVector.Core/`, `reference/python/`, `tests/OpenVector.Core.Tests/` |
-| 1.4 | RawAccel library: 5-DOF projection (A §2.4) + residual and tilt report; settings.json merge with backup; per-version key map; writer.exe runner; revert; reset-to-neutral; logon-task enable/disable/status | Input/Driver | 🔄 | `src/OpenVector.RawAccel/`, `tests/OpenVector.RawAccel.Tests/` |
-| 1.5 | Research driver: Raw Accel v1.7.1 fork with an angle × speed table, a writer extension, a Windows CI build (test-signed), a safety guide (D11) | Input/Driver (research) | 🔄 | `research/rawaccel-angular/` |
-| 1.6 | Capture library (`GetRawInputBuffer` thread, QPC, ring buffer, setExtraInfo) + `tools/CaptureSpike` for the user to run (8 kHz jitter, spike S1) | Trainer | 🔄 | `src/OpenVector.Capture/`, `tools/CaptureSpike/` |
+| 1.2 | CI (Linux + windows-latest), D5 constraint linter, no product reference to `research/`, README and anticheat explainer drafts | QA + Docs/Release | ✅ | `.github/`, `tools/lint/`, `README.md`, `docs/guide/` |
+| 1.3 | Schemas v1 (profile, movement trial) + C# types; Python reference with synthetic users; C# analysis (segmentation, per-direction metrics, Fitts throughput, Fourier order ≤ 8 fit, regularisation, bootstrap CIs) that recovers injected biases | Calibration | ✅ | `schemas/`, `src/OpenVector.Core/`, `reference/python/`, `tests/OpenVector.Core.Tests/` |
+| 1.4 | RawAccel library: 5-DOF projection (A §2.4) + residual and tilt report; settings.json merge with backup; per-version key map; writer.exe runner; revert; reset-to-neutral; logon-task enable/disable/status | Input/Driver | ✅ | `src/OpenVector.RawAccel/`, `tests/OpenVector.RawAccel.Tests/` |
+| 1.5 | Research driver: Raw Accel v1.7.1 fork with an angle × speed table, a writer extension, a Windows CI build (test-signed), a safety guide (D11) | Input/Driver (research) | ✅ | `research/rawaccel-angular/` |
+| 1.6 | Capture library (`GetRawInputBuffer` thread, QPC, ring buffer, setExtraInfo) + `tools/CaptureSpike` for the user to run (8 kHz jitter, spike S1) | Trainer | ✅ | `src/OpenVector.Capture/`, `tools/CaptureSpike/` |
 
 **Wave 2** (after wave 1 is reviewed):
 | # | Task | Owner | Status |

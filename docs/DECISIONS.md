@@ -165,7 +165,7 @@ also visible and removable in Task Scheduler.
 ## D9. Model regularisation defaults (owned by the Calibration agent; PM sets the bounds) — Accepted
 - Gain is limited to **±15% from 1.0** in v1 (configurable to ±25%).
 - Smoothness: the Fourier order is capped by data, with a penalty on high orders.
-- At least 20 valid trials per bin before a bin influences the fit. Otherwise the fit shrinks towards the
+- (Amended by D17: 10 per 32-sector stratum.) At least 20 valid trials per bin before a bin influences the fit. Otherwise the fit shrinks towards the
   neighbouring bins, then towards 1.0.
 - Bootstrap CIs are reported for every bin and every projected parameter.
 
@@ -280,3 +280,28 @@ lossless **session streams** recorded **only inside our trainer during a calibra
 **Other points.**
 - `IProjectionBackend` lives in `OpenVector.RawAccel` for now. Core stays independent (D14), and the App wires the two together.
 - If writer.exe fails at sign-in, its error dialog appears at logon. This is acceptable and is documented in the user guide.
+
+## D17. Calibration amendments — Accepted (PM, from Calibration report)
+**1. Sample minimum (amends D9).**
+- A sector needs **at least 10 valid trials per 32-sector stratum**, which means about 320 flicks or roughly 10 minutes.
+- **Sessions accumulate**, as long as they ran under the same baseline and mapping (D16). The full map gets sharper with more sessions.
+- Below the minimum, a sector shrinks towards its neighbours as before.
+- Reasoning: 20 per stratum needed 640+ flicks before the map moved away from 1.0 at all.
+
+**2. The map is centred by default.**
+- The applied g(θ) is normalised so that its geometric mean over directions is 1, which makes it **purely directional**.
+- The uniform under- or overshoot (c0) is **reported as a suggestion** ("you undershoot everywhere by X%"), not applied.
+  - Slight undershoot in every direction is normal motor strategy (optimised submovements), not a sensitivity error.
+  - The user's base sensitivity is a deliberate choice.
+- An advanced option can include c0.
+
+**3. Conventions.**
+- D14 overrides research B §7.1's "CCW+, screen-up positive" note.
+- JSON names that contain digits are pinned with `[JsonPropertyName]`, because the snake_case policy would otherwise mangle them.
+
+**4. Trainer contract** (for wave 2).
+- Path packets start at the stimulus.
+- The plan's θ is a count-space direction; the trainer converts it with deg/count.
+- The trainer calls `Segmenter.Annotate`.
+- It uses per-packet reconstructed timestamps.
+- It fills `context.previous` and `t_stimulus_on_screen_us`.

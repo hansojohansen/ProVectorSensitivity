@@ -74,14 +74,14 @@
       "path": "raw_input.parquet",
       "format": "ov-raw-input",
       "format_schema_version": "1.0.0",
-      "compression": "parquet-internal"
+      "compression": "parquet_internal"
     },
     {
       "kind": "frames",
       "path": "frames.parquet",
       "format": "ov-frames",
       "format_schema_version": "1.0.0",
-      "compression": "parquet-internal"
+      "compression": "parquet_internal"
     },
     {
       "kind": "events",

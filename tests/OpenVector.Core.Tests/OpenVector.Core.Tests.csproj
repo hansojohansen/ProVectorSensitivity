@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Golden\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\schemas\**\*.json" Link="schemas\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
