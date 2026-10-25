@@ -41,7 +41,8 @@ out="$tmp/new.patch"
   echo "RESEARCH ONLY - test-signed, never shipped, never for anticheat-protected games. MIT (see LICENSE)."
   echo "Apply from an upstream checkout at that commit with: patch -p1 < this.patch"
   echo
-  (cd "$tmp" && diff -ruN a b) || true
+  # strip file timestamps so the patch is reproducible
+  (cd "$tmp" && diff -ruN a b) | sed -E 's#^((---|\+\+\+) [^\t]+)\t.*$#\1#' || true
 } > "$out"
 
 if [[ "${1:-}" == "--check" ]]; then

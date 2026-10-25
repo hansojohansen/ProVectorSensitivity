@@ -3,8 +3,8 @@ RESEARCH ONLY - test-signed, never shipped, never for anticheat-protected games.
 Apply from an upstream checkout at that commit with: patch -p1 < this.patch
 
 diff -ruN a/.gitignore b/.gitignore
---- a/.gitignore	1970-01-01 00:00:00.000000000 +0000
-+++ b/.gitignore	2026-10-25 13:41:46.000000000 +0000
+--- a/.gitignore
++++ b/.gitignore
 @@ -0,0 +1,7 @@
 +# build outputs (research fork)
 +packages/
@@ -14,8 +14,8 @@ diff -ruN a/.gitignore b/.gitignore
 +!signed/README-RESEARCH.txt
 +*.aps
 diff -ruN a/Directory.Build.props b/Directory.Build.props
---- a/Directory.Build.props	1970-01-01 00:00:00.000000000 +0000
-+++ b/Directory.Build.props	2026-10-25 13:41:46.000000000 +0000
+--- a/Directory.Build.props
++++ b/Directory.Build.props
 @@ -0,0 +1,21 @@
 +<!--
 +  OpenVector RESEARCH build (not part of upstream Raw Accel).
@@ -39,15 +39,15 @@ diff -ruN a/Directory.Build.props b/Directory.Build.props
 +  </ImportGroup>
 +</Project>
 diff -ruN a/Directory.Build.targets b/Directory.Build.targets
---- a/Directory.Build.targets	1970-01-01 00:00:00.000000000 +0000
-+++ b/Directory.Build.targets	2026-10-25 13:42:34.000000000 +0000
+--- a/Directory.Build.targets
++++ b/Directory.Build.targets
 @@ -0,0 +1,3 @@
 +<!-- OpenVector RESEARCH build: intentionally empty, isolates this tree from any Directory.Build.targets further up. -->
 +<Project>
 +</Project>
 diff -ruN a/ReadMe.md b/ReadMe.md
---- a/ReadMe.md	2026-10-25 13:52:24.625984938 +0000
-+++ b/ReadMe.md	2026-10-25 13:47:26.000000000 +0000
+--- a/ReadMe.md
++++ b/ReadMe.md
 @@ -1,3 +1,7 @@
 +> **OpenVector RESEARCH fork, NOT official Raw Accel.** This copy adds an experimental angle x speed
 +> gain table and is only ever test-signed. Never use it with anticheat-protected games. See
@@ -57,8 +57,8 @@ diff -ruN a/ReadMe.md b/ReadMe.md
  
  Raw Accel is a Windows 10 & Windows 11 x86-64 driver which allows for the acceleration of mouse input in the raw input stream. It started as a replacement for [InterAccel](https://github.com/KovaaK/InterAccel) and has been extended with more acceleration types, charts, and other features.
 diff -ruN a/build/packages.config b/build/packages.config
---- a/build/packages.config	1970-01-01 00:00:00.000000000 +0000
-+++ b/build/packages.config	2026-10-25 13:41:46.000000000 +0000
+--- a/build/packages.config
++++ b/build/packages.config
 @@ -0,0 +1,7 @@
 +<?xml version="1.0" encoding="utf-8"?>
 +<!-- OpenVector RESEARCH build: WDK + matching SDK from NuGet (see ../Directory.Build.props). -->
@@ -68,8 +68,8 @@ diff -ruN a/build/packages.config b/build/packages.config
 +  <package id="Microsoft.Windows.WDK.x64" version="10.0.26100.6584" targetFramework="native" />
 +</packages>
 diff -ruN a/common/rawaccel-base.hpp b/common/rawaccel-base.hpp
---- a/common/rawaccel-base.hpp	2026-10-25 13:52:24.633131105 +0000
-+++ b/common/rawaccel-base.hpp	2026-10-25 13:38:39.000000000 +0000
+--- a/common/rawaccel-base.hpp
++++ b/common/rawaccel-base.hpp
 @@ -21,6 +21,15 @@
  
      inline constexpr double MAX_NORM = 16;
@@ -126,8 +126,8 @@ diff -ruN a/common/rawaccel-base.hpp b/common/rawaccel-base.hpp
      };
  }
 diff -ruN a/common/rawaccel-validate.hpp b/common/rawaccel-validate.hpp
---- a/common/rawaccel-validate.hpp	2026-10-25 13:52:24.633252851 +0000
-+++ b/common/rawaccel-validate.hpp	2026-10-25 13:39:21.000000000 +0000
+--- a/common/rawaccel-validate.hpp
++++ b/common/rawaccel-validate.hpp
 @@ -178,6 +178,52 @@
  			error("range weights"" must be positive");
  		}
@@ -182,8 +182,8 @@ diff -ruN a/common/rawaccel-validate.hpp b/common/rawaccel-validate.hpp
  	}
  
 diff -ruN a/common/rawaccel-version.h b/common/rawaccel-version.h
---- a/common/rawaccel-version.h	2026-10-25 13:52:24.633278774 +0000
-+++ b/common/rawaccel-version.h	2026-10-25 13:39:32.000000000 +0000
+--- a/common/rawaccel-version.h
++++ b/common/rawaccel-version.h
 @@ -2,7 +2,13 @@
  
  #define RA_VER_MAJOR 1
@@ -209,8 +209,8 @@ diff -ruN a/common/rawaccel-version.h b/common/rawaccel-version.h
  
  }
 diff -ruN a/common/rawaccel.hpp b/common/rawaccel.hpp
---- a/common/rawaccel.hpp	2026-10-25 13:52:24.633295005 +0000
-+++ b/common/rawaccel.hpp	2026-10-25 13:39:11.000000000 +0000
+--- a/common/rawaccel.hpp
++++ b/common/rawaccel.hpp
 @@ -40,6 +40,7 @@
          bool apply_directional_weight = 0;
          bool apply_dir_mul_x = 0;
@@ -337,8 +337,8 @@ diff -ruN a/common/rawaccel.hpp b/common/rawaccel.hpp
  
          modifier(modifier_settings& settings)
 diff -ruN a/driver/driver.rc b/driver/driver.rc
---- a/driver/driver.rc	2026-10-25 13:52:24.635515808 +0000
-+++ b/driver/driver.rc	2026-10-25 13:39:32.000000000 +0000
+--- a/driver/driver.rc
++++ b/driver/driver.rc
 @@ -32,10 +32,10 @@
  	BEGIN
  		BLOCK "040904b0"
@@ -353,8 +353,8 @@ diff -ruN a/driver/driver.rc b/driver/driver.rc
  		END
  	END
 diff -ruN a/installer/installer.cpp b/installer/installer.cpp
---- a/installer/installer.cpp	2026-10-25 13:52:24.638114142 +0000
-+++ b/installer/installer.cpp	2026-10-25 13:39:43.000000000 +0000
+--- a/installer/installer.cpp
++++ b/installer/installer.cpp
 @@ -43,6 +43,24 @@
  int main() {
      SC_HANDLE srv_manager = NULL;
@@ -381,8 +381,8 @@ diff -ruN a/installer/installer.cpp b/installer/installer.cpp
          if (!IsWindows10OrGreater()) {
              throw std::runtime_error("OS not supported, you need at least Windows 10");
 diff -ruN a/installer/installer.rc b/installer/installer.rc
---- a/installer/installer.rc	2026-10-25 13:52:24.638133179 +0000
-+++ b/installer/installer.rc	2026-10-25 13:39:43.000000000 +0000
+--- a/installer/installer.rc
++++ b/installer/installer.rc
 @@ -70,7 +70,7 @@
      BEGIN
          BLOCK "040904b0"
@@ -393,8 +393,8 @@ diff -ruN a/installer/installer.rc b/installer/installer.rc
              VALUE "OriginalFilename", "installer.exe"
              VALUE "ProductName", "Raw Accel"
 diff -ruN a/rawaccel.sln b/rawaccel.sln
---- a/rawaccel.sln	2026-10-25 13:52:24.628361063 +0000
-+++ b/rawaccel.sln	2026-10-25 13:41:30.000000000 +0000
+--- a/rawaccel.sln
++++ b/rawaccel.sln
 @@ -16,14 +16,10 @@
  		{0695A19E-8B14-4DE7-AADF-97E5912B197C} = {0695A19E-8B14-4DE7-AADF-97E5912B197C}
  	EndProjectSection
@@ -449,8 +449,8 @@ diff -ruN a/rawaccel.sln b/rawaccel.sln
  	GlobalSection(SolutionProperties) = preSolution
  		HideSolutionNode = FALSE
 diff -ruN a/signed/README-RESEARCH.txt b/signed/README-RESEARCH.txt
---- a/signed/README-RESEARCH.txt	1970-01-01 00:00:00.000000000 +0000
-+++ b/signed/README-RESEARCH.txt	2026-10-25 13:41:46.000000000 +0000
+--- a/signed/README-RESEARCH.txt
++++ b/signed/README-RESEARCH.txt
 @@ -0,0 +1,6 @@
 +OpenVector RESEARCH build.
 +
@@ -459,8 +459,8 @@ diff -ruN a/signed/README-RESEARCH.txt b/signed/README-RESEARCH.txt
 +Newtonsoft.Json.dll and writer.exe into it. Nothing in here is signed or official.
 +Get the official signed Raw Accel from https://github.com/RawAccelOfficial/rawaccel/releases
 diff -ruN a/wrapper/wrapper.cpp b/wrapper/wrapper.cpp
---- a/wrapper/wrapper.cpp	2026-10-25 13:52:24.642706403 +0000
-+++ b/wrapper/wrapper.cpp	2026-10-25 13:40:31.000000000 +0000
+--- a/wrapper/wrapper.cpp
++++ b/wrapper/wrapper.cpp
 @@ -205,6 +205,53 @@
  	double outputSmoothHalflife;
  };
