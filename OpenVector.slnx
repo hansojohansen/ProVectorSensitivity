@@ -5,7 +5,11 @@
     <Project Path="src/OpenVector.RawAccel/OpenVector.RawAccel.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/OpenVector.Capture.Tests/OpenVector.Capture.Tests.csproj" />
     <Project Path="tests/OpenVector.Core.Tests/OpenVector.Core.Tests.csproj" />
     <Project Path="tests/OpenVector.RawAccel.Tests/OpenVector.RawAccel.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/CaptureSpike/CaptureSpike.csproj" />
   </Folder>
 </Solution>
