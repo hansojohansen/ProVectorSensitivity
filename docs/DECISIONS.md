@@ -1,0 +1,160 @@
+# OpenVector — Decisions Log
+
+Each decision lists its status, reasoning and evidence. Decisions that affect anticheat safety, the driver
+or the data model are mandatory entries (per the PM rules). Research reports are in `docs/research/`.
+
+Status values: **Accepted**, **Proposed (needs user approval)**, **Superseded**.
+
+---
+
+## D0. License: MIT — Accepted (user, 2026-10-25)
+- MIT, compatible with Raw Accel (MIT) and OpenAimTrainer (Apache-2.0).
+- **GPL code is reference only and is never copied.** This covers RefleK's (GPL-3.0), LibreAim and ValTrainer.
+- **NVIDIA FPSci (CC BY-NC-SA) is not used.**
+
+## D1. Input layer: stock, officially signed Raw Accel 1.7.x — Accepted
+**Decision.** OpenVector applies profiles by writing a Raw Accel `settings.json`. That file is applied by
+Raw Accel's own signed `writer.exe` against the official signed driver.
+- We ship **no kernel code**.
+- We do **not bundle or fork the driver**. The user installs official Raw Accel, and we detect and verify its version.
+
+**Why.**
+- Raw Accel is the only open-source, signed, widely anticheat-tolerated mouse filter we found.
+- It sits below mouclass, so it affects raw input (`WM_INPUT`), which is what games read. (A §1.1, §5)
+
+**Rejected alternatives.**
+- **Interception** (A §4): blocked or unsupported by Vanguard and EAC, and historically FACEIT, so it would get users flagged.
+- **Our own KMDF driver:** EV certificate plus attestation, no anticheat goodwill, and it violates "no unsigned kernel code from us".
+- **User-mode hooks or SendInput:** produce injected-flag input, are bypassed by raw input, and can trigger anticheat.
+- **Windows pointer curves:** do not affect raw input.
+
+**Fallback (user decision).** If true angular support never lands, we keep approximating within stock Raw Accel. No fork and no self-signing.
+
+## D2. ⚠ Raw Accel 1.7 cannot express an arbitrary g(θ). We project onto what it can express. — Accepted, flagged to user
+**Finding (A §2, verified against driver source and numerically).**
+- With rotation fixed at 0, the reachable family has **5 degrees of freedom**: base gain G0, a vertical shape factor κ (range weights plus a constant LUT), Y/X ratio ρ, left multiplier L and up multiplier U.
+- **All four axis gains (→ ↓ ← ↑) can be matched exactly.**
+- **The four diagonal gains are tied to one shared shape parameter.**
+- **sin 2θ (the "/" vs "\" diagonal asymmetry) is unreachable.**
+- **Harmonics ≥ 3 are not independently settable.**
+- ρ, L and U also **tilt diagonal output by about 2–5°**.
+- On random smooth targets the fit captures about 76% of the bias variance, leaving about 2.5% RMS residual.
+
+**This means part of the brief is not achievable on today's driver:** a full 16–64-bin directional map
+cannot be applied exactly. Only its 5-DOF projection can.
+
+**Decision.**
+1. The **canonical profile** stays a full-fidelity, smooth g(θ): a Fourier series over angle, with optional
+   distance and speed dimensions later. It is what calibration estimates and what the polar plot shows.
+2. A separate **driver projection** step compiles g(θ) into Raw Accel parameters using the weighted
+   log-space least-squares recipe in A §2.4.
+   - It includes a direction-tilt penalty λ.
+   - Rotation is fixed at 0, because rotation is a constant aim-direction error.
+   - It reports a per-direction residual and a "fraction of your bias we can apply" score.
+3. The UI shows **both** curves (measured and applied) and never implies the applied profile is the full map.
+4. **A/B validation (D8) always tests the applied projection**, not the ideal map.
+5. Calibration analysis reports the empirical **b₂ (sin 2θ) and h ≥ 3 share** across users. That tells us
+   whether the gap matters in practice and gives evidence for upstream.
+
+**Known side effect.** At slow speed and high polling rate, per-packet angles are coarsely quantised
+(1-count vectors). The κ term is per-packet, so it is only approximately right there. ρ, L and U are exact.
+The QA agent will measure this.
+
+## D3. Upstream: support a true angular LUT in Raw Accel — Accepted
+- Two unreviewed upstream PRs already exist: **#352** (an angle→multiplier LUT with 128 points that keeps
+  movement direction, so the closest fit) and #349 (8 sectors).
+- We will help get **#352** (or an equivalent) merged: reviews, tests, and a stateless, direction-preserving design.
+- The profile format already stores the full g(θ), so moving to a true LUT later needs only a new projection backend. No re-calibration is needed.
+- Expectation: **6–18 months or never**. Signed releases are rare, and only the original author's EV certificate can sign them.
+- **Phase 1 does not depend on this.**
+
+## D4. Applying, persistence, coexistence and reset — Proposed (needs user approval for the logon task)
+- **Apply.**
+  1. Read the user's existing Raw Accel `settings.json`.
+  2. Make a timestamped backup in `%LOCALAPPDATA%\OpenVector\backups\`.
+  3. Modify **only the fields we own** (Output DPI, Y/X ratio, L/R, U/D, range weights, LUT) in the
+     selected profile, and keep the user's other profiles and device mappings.
+  4. Validate the file against our per-version key map. writer.exe silently replaces unknown keys with defaults, so we must refuse untested Raw Accel versions.
+  5. Run `writer.exe` with a timeout. On error it shows a modal dialog and exits with code 1.
+- **Persistence.** The driver forgets its settings on reboot. That is acceptable because Raw Accel's own
+  `writer.exe` re-runs at logon, through a scheduled task that applies the same `settings.json`.
+  - **No OpenVector process runs at logon or in game.** The task applies the file and exits in about 1 s.
+  - The Raw Accel GUI's "auto write on startup" applies the same file, so the two stay consistent.
+  - **⚠ Needs approval:** this is a startup entry. It does not break "no background app in game", but we are spelling it out.
+- **Revert.** Restore the backup and re-run writer.exe.
+- **Reset to neutral.** Write a known neutral profile (Output DPI = the user's prior value, all ratios 1,
+  no LUT) and remove the scheduled task. The **uninstaller always runs reset-to-neutral**.
+- **Accel curves.** If the user already uses a Raw Accel accel curve, κ (range weights) would interact with
+  it. In that case the projection uses only G0, ρ, L and U, and says so in the UI.
+- **Status indicator.** writer.exe cannot read settings back. In v1 the status compares the hash of the
+  file we last wrote, the driver version (GET_VERSION IOCTL) and the scheduled-task state. In Phase 2 a
+  rebuilt Raw Accel wrapper gives true read-back.
+- **Security note.** The Raw Accel control device is writable by any user without admin. That is
+  convenient, but QA must document it in the threat model.
+
+## D5. Anticheat-safety guarantees — Accepted
+- The **only** thing that affects games is Raw Accel's driver state, written once from a static file.
+- OpenVector never opens game processes, reads memory, captures the screen, or reads the state of any other app.
+- The **trainer** reads raw input **only in its own window, only while it is in the foreground**, and only during a calibration session.
+- **No adaptation outside calibration.** A profile changes only after: a calibration session → user review → an explicit "Apply" click.
+- **External trainer adapters (Phase 3)** may only read files the trainer exports, or capture our own raw input while the user plays.
+  - **Memory reading is permanently banned**, so tools like Aiming-cookie's approach are excluded.
+- QA runs a static check in CI that bans these APIs: `OpenProcess`, `ReadProcessMemory`,
+  `WriteProcessMemory`, `CreateRemoteThread`, `SetWindowsHookEx`, `SendInput`, `BitBlt` on foreign windows,
+  and DXGI duplication.
+
+## D6. Aim data source: a built-in 3D calibration trainer behind a pluggable `DataSource` — Accepted
+**Why (B §1–5).**
+- **KovaaK's** exports per-kill and per-shot stats, but **no crosshair or target positions**.
+- **Aimlabs** has no SDK. Its replays are undocumented, run at about 60 Hz, and its terms of service are unclear.
+- **A hybrid capture-while-playing approach** needs about 2–4× more flicks to detect a 5% bias, works on static flick scenarios only, and its targets are inferred.
+- **PureVector itself** runs calibration inside Aimlabs, where target positions are known.
+
+**Decision.**
+- **View:** a native 3D view whose yaw/pitch per count and FOV match the user's game.
+  - Matching is set by cm/360, or by game sens + DPI.
+  - Perspective makes screen position non-linear in angle, so a 2D view is not equivalent.
+- **Protocol:** an ISO 9241-411-style multidirectional flick protocol.
+  - Directions are balanced across bins, in randomised order.
+  - 3 amplitudes, and controlled target sizes.
+  - Tracking tasks come second.
+- **Every trial is a `MovementTrial` record** (schema in B §7.1, versioned from day one).
+  - It stores raw counts plus the mapping, and `target_truth` and `confidence` for its provenance.
+- **Planned adapters, Phase 3:**
+  - `kovaaks-hybrid` (inferred targets, down-weighted)
+  - `osu-replay` (research only)
+  - Aimlabs: **out of tree only, after the user reads its EULA.**
+- OpenAimTrainer (Apache-2.0, Godot) was evaluated for forking. We **are not forking it** (see D7: own renderer for timing control), but it can serve as a design reference.
+
+## D7. Tech stack: C# / .NET 10 LTS, one solution — Accepted
+| Component | Choice | Reason |
+|---|---|---|
+| Core library (model, profiles, Raw Accel adapter, stats) | C# (.NET 10), MathNet.Numerics, xUnit | Same ecosystem as Raw Accel's GUI and wrapper; testable on Linux CI too |
+| Desktop app | Avalonia + ScottPlot 5 polar plots | Raw Accel's next GUI also uses Avalonia; MIT |
+| Trainer | Separate C# exe, small D3D11 renderer (Silk.NET or Vortice), **dedicated raw-input thread** | Godot and SDL take over the single per-process raw-input registration and lose per-event timing |
+| Raw input | `GetRawInputBuffer` batching on a high-priority thread with a message-only window; QPC per batch; lock-free ring buffer; the camera and the logger read the same stream | Required for 8 kHz (C §2) |
+| Model reference | Python (numpy/scipy), **dev-only, not shipped**; generates golden test vectors the C# code must match | Best tools for the science work, no packaging pain |
+| Formats | Profile: JSON + JSON Schema (versioned). Trials: JSONL summary + Parquet raw streams | Language-neutral, so external sources can be added |
+| Release | GitHub Actions (windows-latest), Velopack installer, SignPath Foundation signing (Azure Artifact Signing as fallback) | Free signing for OSS |
+
+**Fallback.** If the C# capture loop shows unacceptable GC/jitter at 8 kHz (spike S1), move the capture loop into a small native C DLL.
+
+**Raw Accel in-trainer.** Enable `setExtraInfo` so each packet carries the counts both before and after Raw Accel. This lets us check that the applied profile really is in effect during A/B sessions.
+
+## D8. Validation, versioning and rollback — Accepted (implemented in Phase 2)
+- **Blind A/B:** interleaved blocks with the old and new *applied projections*, applied through the same writer path. The user doesn't know which one is active.
+  - Throughput (Fitts, effective width) is the main metric.
+  - Recommend applying only if the improvement is statistically meaningful (pre-registered test, e.g. a paired bootstrap CI excluding 0 with α = 0.05) **and** no direction gets meaningfully worse.
+- **Profiles are immutable and versioned.** Each version stores: parent version, calibration session IDs, model parameters + CIs, the projection, the residual and the A/B result.
+  - A history list supports one-click rollback.
+
+## D9. Model regularisation defaults (owned by the Calibration agent; PM sets the bounds) — Accepted
+- Gain is limited to **±15% from 1.0** in v1 (configurable to ±25%).
+- Smoothness: the Fourier order is capped by data, with a penalty on high orders.
+- At least 20 valid trials per bin before a bin influences the fit. Otherwise the fit shrinks towards the
+  neighbouring bins, then towards 1.0.
+- Bootstrap CIs are reported for every bin and every projected parameter.
+
+## D10. Hardware dongle variant — Parked
+This is a closed-source commercial USB pass-through device. It is outside this project's scope; see `CLAUDE.md`.
+**Only constraint now:** the profile format must stay hardware-agnostic, in counts and angles, not Raw Accel keys.
